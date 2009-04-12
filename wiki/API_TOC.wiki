@@ -1,2 +1,2 @@
   * [Bitmap Bitmap]
-    * [Bitmap/__construct __construct]
+    * [Bitmap0__construct __construct]
