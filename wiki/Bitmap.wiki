@@ -1,4 +1,8 @@
 #summary class Bitmap
 #sidebar API_TOC
 
-= class Bitmap =
+== Fields ==
+  * $parent
+  * $x, $y
+  * $w, $h
+  * $cx, $cy
