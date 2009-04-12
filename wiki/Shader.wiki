@@ -1,2 +1,2 @@
-#navbar API_TOC
 #summary class Shader
+#sidebar API_TOC
