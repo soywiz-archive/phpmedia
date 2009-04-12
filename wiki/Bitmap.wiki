@@ -11,7 +11,7 @@
   * __construct($w, $h)
   * slice($x, $y, $w, $h, $cx = 0, $cy = 0)
   * clear($r = 0.0, $g = 0.0, $b = 0.0, $a = 0.0)
-  * blit([Bitmap] $src, $x, $y, $size = 1.0, $rotation = 0, $alpha = 1.0, [PixelShader] $shader = NULL)
+  * blit([Bitmap] $src, $x, $y, $size = 1.0, $rotation = 0, $alpha = 1.0, [Shader] $shader = NULL)
 
 == Static Methods ==
   * fromFile($file)
