@@ -25,8 +25,18 @@
 				return 'API_' . strlen($class) . $class;
 			break;
 			case 2:
+				$component = str_replace('$', '', $component);
 				return 'API_' . strlen($class) . $class . strlen($component) . $component;
 			break;
+		}
+	}
+	
+	function mangle_link($path, $long = false) {
+		if ($long) {
+			return '[' . mangle($path) . ' ' . $path . ']';
+		} else {
+			$a = explode('::', $path);
+			return '[' . mangle($path) . ' ' . array_pop($a) . ']';
 		}
 	}
 	
@@ -49,14 +59,35 @@
 			$icon = 'method';
 			if ($method->isStatic()) $icon .= '_static';
 			
-			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $method->getName()), $method->getName());
-			fprintf($fclass, "  * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $method->getName()), $method->getName());
+			$doc = $method->getDocComment();
+			$return = 'void';
+			if (preg_match('/@return\\s+(\\w+)/si', $doc, $matches)) {
+				$return = class_exists($matches[1]) ? mangle_link($matches[1]) : $matches[1];
+			}
+			$params = array();
+			foreach ($method->getParameters() as $parameter) {
+				$param = '';
+				$cclass = $parameter->getClass();
+				if ($cclass) {
+					$param .= mangle_link($cclass->getName()) . ' ';
+				}
+				$param .= '$' . $parameter->getName();
+				if ($parameter->isDefaultValueAvailable()) {
+					$param .= '<font color="#999"> = ' . str_replace("\n", '', var_export($parameter->getDefaultValue(), true) . '</font>');
+				}
+				$params[] = $param;
+			}
+			
+			//print_r($method->getParameters());
+			
+			fprintf($ftoc, "    * %s%s\n", icon($icon), mangle_link($class->getName() . '::' . $method->getName(), false));
+			fprintf($fclass, "  * %s%s (%s) : <font color=\"#a88\">%s</font>\n", icon($icon), mangle_link($class->getName() . '::' . $method->getName(), false), implode(', ', $params), $return);
 		}
 		
 		foreach ($class->getProperties() as $property) {
 			$icon = 'field';
-			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $property->getName()), '$' . $property->getName());
-			fprintf($fclass, "  * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $property->getName()), '$' . $property->getName());
+			fprintf($ftoc, "    * %s%s\n", icon($icon), mangle_link($class->getName() . '::$' . $property->getName(), false));
+			fprintf($fclass, "  * %s%s\n", icon($icon), mangle_link($class->getName() . '::$' . $property->getName(), false));
 		}
 		
 		foreach ($class->getConstants() as $constant) {

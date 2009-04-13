@@ -1,13 +1,13 @@
 == class Bitmap ==
-  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap11__construct __construct]
-  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Bitmap8fromFile fromFile]
-  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Bitmap10fromString fromString]
-  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap9duplicate duplicate]
-  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap7__clone __clone]
-  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5slice slice]
-  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5split split]
-  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5clear clear]
-  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap4blit blit]
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap11__construct __construct] ($w, $h) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Bitmap8fromFile fromFile] ($filename) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Bitmap10fromString fromString] ($string) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap9duplicate duplicate] () : <font color="#a88">[API_6Bitmap Bitmap]</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap7__clone __clone] () : <font color="#a88">[API_6Bitmap Bitmap]</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5slice slice] ($x, $y, $w, $h) : <font color="#a88">[API_6Bitmap Bitmap]</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5split split] ($w, $h) : <font color="#a88">Array</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5clear clear] ($color<font color="#999"> = NULL</font>) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap4blit blit] ([API_6Bitmap Bitmap] $src, $x, $y, $size<font color="#999"> = 1</font>, $rotation<font color="#999"> = 0</font>, $alpha<font color="#999"> = 1</font>, [API_6Shader Shader] $shader<font color="#999"> = NULL</font>) : <font color="#a88">void</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Bitmap6parent $parent]
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Bitmap1x $x]
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Bitmap1y $y]

@@ -1,2 +1,2 @@
 == class Audio ==
-  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Audio4init init]
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Audio4init init] ($frequency<font color="#999"> = 22050</font>) : <font color="#a88">[API_7Channel Channel]</font>

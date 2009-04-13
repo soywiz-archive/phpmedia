@@ -1,2 +1,2 @@
 == class Screen ==
-  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Screen4init init]
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Screen4init init] ($w<font color="#999"> = 640</font>, $h<font color="#999"> = 480</font>, $fullscreen<font color="#999"> = false</font>) : <font color="#a88">[API_6Bitmap Bitmap]</font>
