@@ -35,20 +35,36 @@
 		return "[http://phpmedia.googlecode.com/svn/www/icons/{$name}.png]";
 	}
 	
-	echo "Writting TOC... ";
-	if (!($tocf = fopen($path_wiki_toc, 'wb'))) {
+	if (!($ftoc = fopen($path_wiki_toc, 'wb'))) {
 		die("Error\n");
 	}
 	foreach ($classes as $class_name) {
 		$class = new ReflectionClass($class_name);
 		//$doc = $class->getDocComment();
-		fprintf($tocf, "  * %s[%s %s]\n", icon('class'), mangle($class->getName()), $class->getName());
+		fprintf($ftoc, "  * %s[%s %s]\n", icon('class'), mangle($class->getName()), $class->getName());
 		foreach ($class->getMethods() as $method) {
 			$icon = 'method';
 			if ($method->isStatic()) $icon .= '_static';
 			
-			fprintf($tocf, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $method->getName()), $method->getName());
+			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $method->getName()), $method->getName());
+		}
+		
+		foreach ($class->getMethods() as $method) {
+			$icon = 'method';
+			if ($method->isStatic()) $icon .= '_static';
+			
+			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $method->getName()), $method->getName());
+		}
+
+		foreach ($class->getProperties() as $property) {
+			$icon = 'method';
+			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $property->getName()), $property->getName());
+		}
+		
+		foreach ($class->getConstants() as $constant) {
+			$icon = 'method';
+			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $constant->getName()), $constant->getName());
 		}
 	}
-	echo "Ok\n";
+	fclose($ftoc);
 ?>
