@@ -51,12 +51,12 @@
 		}
 		
 		foreach ($class->getProperties() as $property) {
-			$icon = 'method';
+			$icon = 'field';
 			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $property->getName()), $property->getName());
 		}
 		
 		foreach ($class->getConstants() as $constant) {
-			$icon = 'method';
+			$icon = 'constant';
 			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $constant->getName()), $constant->getName());
 		}
 	}
