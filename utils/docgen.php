@@ -44,7 +44,10 @@
 		//$doc = $class->getDocComment();
 		fprintf($tocf, "  * %s[%s %s]\n", icon('class'), mangle($class->getName()), $class->getName());
 		foreach ($class->getMethods() as $method) {
-			fprintf($tocf, "    * %s[%s %s]\n", icon('method'), mangle($class->getName() . '::' . $method->getName()), $method->getName());
+			$icon = 'method';
+			if ($method->isStatic()) $icon .= '_static';
+			
+			fprintf($tocf, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $method->getName()), $method->getName());
 		}
 	}
 	echo "Ok\n";
