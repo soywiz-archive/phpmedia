@@ -1,0 +1,2 @@
+== class Audio ==
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Audio4init init]

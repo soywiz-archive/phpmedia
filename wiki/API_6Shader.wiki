@@ -1,0 +1,3 @@
+== class Shader ==
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Shader11__construct __construct]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Shader6params $params]

@@ -1,0 +1,5 @@
+== class Channel ==
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_7Channel7playing $playing]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_7Channel8position $position]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_7Channel6length $length]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_7Channel5sound $sound]

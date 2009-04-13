@@ -3,7 +3,6 @@
 	
 	$path_php_api  = ROOT . '/trunk/api.php';
 	$path_wiki     = ROOT . '/wiki';
-	$path_wiki_toc = $path_wiki . '/API_TOC.wiki';
 	
 	if (!is_readable($path_wiki)) {
 		die("'" . ($path_wiki) . "' doesn't exists.");
@@ -35,29 +34,35 @@
 		return "[http://phpmedia.googlecode.com/svn/www/icons/{$name}.png]";
 	}
 	
-	if (!($ftoc = fopen($path_wiki_toc, 'wb'))) {
+	if (!($ftoc = fopen("{$path_wiki}/API_TOC.wiki", 'wb'))) {
 		die("Error\n");
 	}
 	foreach ($classes as $class_name) {
 		$class = new ReflectionClass($class_name);
 		//$doc = $class->getDocComment();
 		fprintf($ftoc, "  * %s[%s %s]\n", icon('class'), mangle($class->getName()), $class->getName());
+		
+		$fclass = fopen("{$path_wiki}/" . mangle($class->getName()) . ".wiki", 'wb');
+		fprintf($fclass, "== class %s ==\n", $class->getName());
 
 		foreach ($class->getMethods() as $method) {
 			$icon = 'method';
 			if ($method->isStatic()) $icon .= '_static';
 			
 			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $method->getName()), $method->getName());
+			fprintf($fclass, "  * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $method->getName()), $method->getName());
 		}
 		
 		foreach ($class->getProperties() as $property) {
 			$icon = 'field';
 			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $property->getName()), '$' . $property->getName());
+			fprintf($fclass, "  * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $property->getName()), '$' . $property->getName());
 		}
 		
 		foreach ($class->getConstants() as $constant) {
 			$icon = 'constant';
 			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $constant->getName()), $constant->getName());
+			fprintf($fclass, "  * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $constant->getName()), $constant->getName());
 		}
 	}
 	fclose($ftoc);
