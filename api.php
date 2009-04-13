@@ -20,10 +20,31 @@ final class Screen {
  *
  */
 final class Channel {
+	const FREE = -1;
+
 	public $playing;
 	public $position;
 	public $length;
 	public $sound;
+	
+	/**
+	* Obtains a channel of the current index. Use the constante FREE to obtain a free channel.
+	*
+	* @param int $index Channel index.
+	* @return Channel
+	*/
+	static public function get($index) { }
+	
+	/**
+	* Plays the specified sound in this channel.
+	*
+	* @param Sound $sound Sound to play.
+	* @param float $volume Volume to play the sound [0.0, 1.0].
+	* @param float $fadeIn Time in seconds for the fade in.
+	* @param float $fadeOut Time in seconds for the fade out.
+	* @return Channel
+	*/
+	public function play(Sound $sound, $volume = 1.0, $fadeIn = 0.0, $fadeOut = 0.0, SoundEffect $effect = NULL) { }
 }
 
 /**
@@ -31,7 +52,14 @@ final class Channel {
  *
  */
 final class Sound {
-	
+	public function slice($start = 0, $length = NULL) { }
+}
+
+/**
+ * SoundEffect class
+ *
+ */
+final class SoundEffect {
 }
 
 /**
@@ -43,7 +71,6 @@ final class Audio {
 	* Initializes the audio subsystem.
 	*
 	* @param int $frequency Frequency in hz for the sampling.
-	* @return Channel
 	*/
 	static public function init($frequency = 22050) { }
 }
