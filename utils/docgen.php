@@ -42,6 +42,7 @@
 		$class = new ReflectionClass($class_name);
 		//$doc = $class->getDocComment();
 		fprintf($ftoc, "  * %s[%s %s]\n", icon('class'), mangle($class->getName()), $class->getName());
+
 		foreach ($class->getMethods() as $method) {
 			$icon = 'method';
 			if ($method->isStatic()) $icon .= '_static';
@@ -49,13 +50,6 @@
 			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $method->getName()), $method->getName());
 		}
 		
-		foreach ($class->getMethods() as $method) {
-			$icon = 'method';
-			if ($method->isStatic()) $icon .= '_static';
-			
-			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $method->getName()), $method->getName());
-		}
-
 		foreach ($class->getProperties() as $property) {
 			$icon = 'method';
 			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $property->getName()), $property->getName());
