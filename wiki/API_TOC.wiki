@@ -1,5 +1,3 @@
-== API ==
-
   * [http://phpmedia.googlecode.com/svn/www/icons/class.png][Bitmap]
     * [http://phpmedia.googlecode.com/svn/www/icons/method.png][Bitmap0__construct __construct]
   * [http://phpmedia.googlecode.com/svn/www/icons/class.png][Shader]
