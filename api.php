@@ -4,6 +4,14 @@
  *
  */
 final class Screen {
+	/**
+	* Initializes a window to start drawing.
+	*
+	* @param int $w Width of the window to create.
+	* @param int $h Height of the window to create.
+	* @param boolean $fullscreen Determines wether to create a fullscreen windows or not.
+	* @return Bitmap
+	*/
 	static public function init($w = 640, $h = 480, $fullscreen = false) { } // Bitmap $screen
 }
 
