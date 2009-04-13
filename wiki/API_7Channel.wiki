@@ -1,4 +1,5 @@
 == class Channel ==
+<font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_7Channel3get get] ($index) : <font color="#a88">[API_7Channel Channel]</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_7Channel4play play] ([API_5Sound Sound] $sound, $volume<font color="#999"> = 1</font>, $fadeIn<font color="#999"> = 0</font>, $fadeOut<font color="#999"> = 0</font>, [API_11SoundEffect SoundEffect] $effect<font color="#999"> = NULL</font>) : <font color="#a88">[API_7Channel Channel]</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_7Channel7playing $playing]
@@ -6,3 +7,4 @@
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_7Channel6length $length]
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_7Channel5sound $sound]
   * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_7Channel4FREE FREE] = <font color="#a88">-1</font>
+</font>

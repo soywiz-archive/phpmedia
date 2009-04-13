@@ -54,6 +54,7 @@
 		
 		$fclass = fopen("{$path_wiki}/" . mangle($class->getName()) . ".wiki", 'wb');
 		fprintf($fclass, "== class %s ==\n", $class->getName());
+		fprintf($fclass, "<font face=\"Lucida Console\">\n");
 
 		foreach ($class->getMethods() as $method) {
 			$icon = 'method';
@@ -95,6 +96,8 @@
 			fprintf($ftoc, "    * %s%s\n", icon($icon), mangle_link($class->getName() . '::' . $constant));
 			fprintf($fclass, "  * %s%s = <font color=\"#a88\">%s</font>\n", icon($icon), mangle_link($class->getName() . '::' . $constant), $constant_value);
 		}
+		
+		fprintf($fclass, "</font>\n");
 	}
 	fclose($ftoc);
 ?>
