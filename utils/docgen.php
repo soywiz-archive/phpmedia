@@ -52,7 +52,7 @@
 		
 		foreach ($class->getProperties() as $property) {
 			$icon = 'field';
-			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $property->getName()), $property->getName());
+			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $property->getName()), '$' . $property->getName());
 		}
 		
 		foreach ($class->getConstants() as $constant) {
