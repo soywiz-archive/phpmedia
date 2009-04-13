@@ -90,10 +90,10 @@
 			fprintf($fclass, "  * %s%s\n", icon($icon), mangle_link($class->getName() . '::$' . $property->getName(), false));
 		}
 		
-		foreach ($class->getConstants() as $constant) {
+		foreach ($class->getConstants() as $constant => $constant_value) {
 			$icon = 'constant';
-			fprintf($ftoc, "    * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $constant->getName()), $constant->getName());
-			fprintf($fclass, "  * %s[%s %s]\n", icon($icon), mangle($class->getName() . '::' . $constant->getName()), $constant->getName());
+			fprintf($ftoc, "    * %s%s\n", icon($icon), mangle_link($class->getName() . '::' . $constant));
+			fprintf($fclass, "  * %s%s = <font color=\"#a88\">%s</font>\n", icon($icon), mangle_link($class->getName() . '::' . $constant), $constant_value);
 		}
 	}
 	fclose($ftoc);
