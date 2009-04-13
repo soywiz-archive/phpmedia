@@ -62,10 +62,37 @@ final class Bitmap {
 	static public function fromFile($filename) { }
 	static public function fromString($string) { }
 
+	/**
+	* Duplicates the bitmap and the texture.
+	*
+	* @return Bitmap
+	*/	
 	public function duplicate() { }
+
+	/**
+	* Clones the Bitmap without cloning the texture. Useful for using the same texture with different center addresses.
+	*
+	* @return Bitmap
+	*/	
 	public function __clone() { }
+
+	/**
+	* Makes a slice of the bitmap without duplicating the texture.
+	*
+	* @return Bitmap
+	*/	
 	public function slice($x, $y, $w, $h) { }
+
+	/**
+	* Makes an array of slices of the bitmap without duplicating the texture.
+	*
+	* @return Array
+	*/	
 	public function split($w, $h) { } // Like slice
+
+	/**
+	* Clears the bitmap with the specified color.
+	*/	
 	public function clear($color = NULL) { } // array(0.0, 0.0, 0.0, 0.0)
 	public function blit(Bitmap $src, $x, $y, $size = 1.0, $rotation = 0, $alpha = 1.0, Shader $shader = NULL) { }
 }
