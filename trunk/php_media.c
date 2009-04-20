@@ -38,12 +38,24 @@ int keys_pressed[SDLK_LAST];
 static zend_object_handlers Bitmap_Handlers;
 static zend_class_entry    *Bitmap_ClassEntry;
 
+typedef struct {
+	SDL_Surface *surface;
+	GLint gltex;
+	int refcount;
+	int updated_source;
+} Image;
+
 typedef struct _BitmapStruct {
 	zend_object std;
 	struct _BitmapStruct *parent;
 	SDL_Surface *surface;
 	GLint gltex;
+
+	// new impl
+	Image image;
+
 	int cx, cy;
+	int x, y, w, h;
 } BitmapStruct;
 
 int __texPow2 = 0;
@@ -136,14 +148,14 @@ void BitmapPrepareDraw(BitmapStruct *bitmap) {
 
 		glMatrixMode(GL_MODELVIEW);
 	} else {
+		glViewport(bitmap->x, bitmap->y, bitmap->w, bitmap->h);
+
 		if (fbo_selected_draw == bitmap->gltex) return;
 		fbo_selected_draw = bitmap->gltex;
 		InitializeFrameBufferObject();
 		glFlush();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, bitmap->gltex, 0);
-
-		glViewport(0, 0, bitmap->surface->w, bitmap->surface->h + 1);
 
 		glMatrixMode(GL_TEXTURE);
 		glPushMatrix();
@@ -222,8 +234,15 @@ void BitmapPrepare(BitmapStruct *bitmap) {
 	SDL_BlitSurface(bitmap->surface, 0, surfaceogl, 0);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, surfaceogl->w, surfaceogl->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surfaceogl->pixels);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glEnable(GL_CLAMP_TO_EDGE);
+	
+	SDL_FreeSurface(surfaceogl);
 }
 
 static zval *ObjectInit(zend_class_entry *pce, zval *object, TSRMLS_D)
@@ -238,9 +257,15 @@ static zval *ObjectInit(zend_class_entry *pce, zval *object, TSRMLS_D)
 
 static void Bitmap__ObjectDelete(void *object, TSRMLS_D)
 {
-	BitmapStruct *intern = (BitmapStruct *)object;
+	BitmapStruct *bitmap = (BitmapStruct *)object;
 	{
-		zend_object_std_dtor(&intern->std, TSRMLS_C);
+		if (bitmap->surface)
+		{
+			glDeleteTextures(1, &bitmap->gltex);
+			SDL_FreeSurface(bitmap->surface);
+		}
+		zend_object_std_dtor(&bitmap->std, TSRMLS_C);
+		//printf("free\n");
 	}
 	efree(object);
 }
@@ -293,6 +318,11 @@ static zend_object_value Bitmap__ObjectClone(zval *this_ptr, TSRMLS_D)
 	CLONE_COPY_FIELD(gltex);
 	CLONE_COPY_FIELD(cx);
 	CLONE_COPY_FIELD(cy);
+	CLONE_COPY_FIELD(x);
+	CLONE_COPY_FIELD(y);
+	CLONE_COPY_FIELD(w);
+	CLONE_COPY_FIELD(h);
+	new_obj->surface->refcount++;
 	
 	return new_ov;
 }
@@ -308,7 +338,15 @@ PHP_METHOD(Bitmap, __construct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "ll", &w, &h) == FAILURE) RETURN_FALSE;
 
 	bitmap->surface = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);
-	BitmapPrepare(bitmap);
+	if (bitmap->surface) {
+		bitmap->x = 0;
+		bitmap->y = 0;
+		bitmap->w = w;
+		bitmap->h = h;
+		bitmap->cx = 0;
+		bitmap->cy = 0;
+		BitmapPrepare(bitmap);
+	}
 }
 
 // Bitmap::__set($key, $value)
@@ -339,8 +377,8 @@ PHP_METHOD(Bitmap, __get)
 
 	switch (key_l) {
 		case 1:
-			if (strcmp(key, "w") == 0) RETURN_LONG((bitmap && bitmap->surface) ? bitmap->surface->w : 0);
-			if (strcmp(key, "h") == 0) RETURN_LONG((bitmap && bitmap->surface) ? bitmap->surface->h : 0);
+			if (strcmp(key, "w") == 0) RETURN_LONG((bitmap && bitmap->surface) ? bitmap->w : 0);
+			if (strcmp(key, "h") == 0) RETURN_LONG((bitmap && bitmap->surface) ? bitmap->h : 0);
 		break;
 		case 2:
 			if (strcmp(key, "cx") == 0) RETURN_LONG((bitmap) ? bitmap->cx : 0);
@@ -349,6 +387,71 @@ PHP_METHOD(Bitmap, __get)
 	}
 
 	RETURN_FALSE;
+}
+
+void clamp(int *v, int min, int max) {
+	if (*v < min) *v = min;
+	if (*v > max) *v = max;
+}
+
+// Bitmap::slice($x, $y, $w, $h)
+PHP_METHOD_ARGS(Bitmap, slice) ARG_INFO(x) ARG_INFO(y) ARG_INFO(w) ARG_INFO(h) ZEND_END_ARG_INFO()
+PHP_METHOD(Bitmap, slice)
+{
+	int x = 0, y = 0, w = 0, h = 0;
+	BitmapStruct *new_bitmap;
+	THIS_BITMAP;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "llll", &x, &y, &w, &h) == FAILURE) RETURN_FALSE;
+	
+	clamp(&x, 0, bitmap->w);
+	clamp(&y, 0, bitmap->h);
+	clamp(&w, 0, bitmap->w - x);
+	clamp(&h, 0, bitmap->h - y);
+
+	ObjectInit(Bitmap_ClassEntry, return_value, TSRMLS_C);
+	new_bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
+	new_bitmap->parent = bitmap;
+	new_bitmap->surface = bitmap->surface;
+	new_bitmap->gltex = bitmap->gltex;
+	new_bitmap->x = x + bitmap->x;
+	new_bitmap->y = y + bitmap->y;
+	new_bitmap->cx = 0;
+	new_bitmap->cy = 0;
+	new_bitmap->w = w;
+	new_bitmap->h = h;
+	new_bitmap->surface->refcount++;
+}
+
+// Bitmap::split($w, $h)
+PHP_METHOD_ARGS(Bitmap, split) ARG_INFO(w) ARG_INFO(h) ZEND_END_ARG_INFO()
+PHP_METHOD(Bitmap, split)
+{
+	int w = 0, h = 0;
+	int x, y;
+	zval *object;
+	BitmapStruct *new_bitmap;
+	THIS_BITMAP;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "ll", &w, &h) == FAILURE) RETURN_FALSE;
+	
+	array_init(return_value);
+	
+	for (y = 0; y < bitmap->h; y += h) {
+		for (x = 0; x < bitmap->w; x += w) {
+			object = ObjectInit(Bitmap_ClassEntry, NULL, TSRMLS_C);
+			new_bitmap = zend_object_store_get_object(object, TSRMLS_C);
+			new_bitmap->parent = bitmap;
+			new_bitmap->surface = bitmap->surface;
+			new_bitmap->gltex = bitmap->gltex;
+			new_bitmap->x = x + bitmap->x;
+			new_bitmap->y = y + bitmap->y;
+			new_bitmap->cx = 0;
+			new_bitmap->cy = 0;
+			new_bitmap->w = w;
+			new_bitmap->h = h;
+			new_bitmap->surface->refcount++;
+			add_next_index_zval(return_value, object);
+		}
+	}
 }
 
 // Bitmap::fromFile($name)
@@ -364,6 +467,9 @@ PHP_METHOD(Bitmap, fromFile)
 		ObjectInit(Bitmap_ClassEntry, return_value, TSRMLS_C);
 		bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
 		bitmap->surface = surface;
+		bitmap->x = bitmap->y = bitmap->cx = bitmap->cy = 0;
+		bitmap->w = surface->w;
+		bitmap->h = surface->h;
 		BitmapPrepare(bitmap);
 	} else {
 		RETURN_FALSE;
@@ -383,6 +489,9 @@ PHP_METHOD(Bitmap, fromString)
 		ObjectInit(Bitmap_ClassEntry, return_value, TSRMLS_C);
 		bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
 		bitmap->surface = surface;
+		bitmap->x = bitmap->y = bitmap->cx = bitmap->cy = 0;
+		bitmap->w = surface->w;
+		bitmap->h = surface->h;
 		BitmapPrepare(bitmap);
 	} else {
 		RETURN_FALSE;
@@ -430,13 +539,14 @@ PHP_METHOD_ARGS(Bitmap, blit) ZEND_END_ARG_INFO()
 PHP_METHOD(Bitmap, blit)
 {
 	zval *object;
-	int x = 0, y = 0;
+	double x = 0, y = 0;
 	double size = 1, rotation = 0, alpha = 1;
 	BitmapStruct *source;
 	double w, h, cx, cy;
+	double tx[2], ty[2];
 	THIS_BITMAP;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "O|llddd", &object, Bitmap_ClassEntry, &x, &y, &size, &rotation, &alpha) == FAILURE) RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "O|ddddd", &object, Bitmap_ClassEntry, &x, &y, &size, &rotation, &alpha) == FAILURE) RETURN_FALSE;
 
 	source = (BitmapStruct *)zend_object_store_get_object(object, TSRMLS_C);
 	//printf("%d\n", source->gltex);
@@ -445,7 +555,7 @@ PHP_METHOD(Bitmap, blit)
 	BitmapPrepareDraw(bitmap);
 
 	glLoadIdentity();
-	glTranslated((double)x, (double)y, 0);
+	glTranslated(x, y, 0);
 	glRotated(rotation, 0, 0, 1);
 	//glScaled((double)source->surface->w, (double)source->surface->h, 1);
 	glScaled(size, size, 1);
@@ -455,17 +565,21 @@ PHP_METHOD(Bitmap, blit)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glColor4d(1, 1, 1, alpha);
-	w = source->surface->w;
-	h = source->surface->h;
+	w = source->w;
+	h = source->h;
 	cx = source->cx;
 	cy = source->cy;
+	tx[0] = (double)(source->x + 0) / (double)source->surface->w;
+	tx[1] = (double)(source->x + w) / (double)source->surface->w;
+	ty[0] = (double)(source->y + 0) / (double)source->surface->h;
+	ty[1] = (double)(source->y + h) / (double)source->surface->h;
 	
 	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_POLYGON);
-		glTexCoord2d(0, 0); glVertex2d(0 - cx, 0 - cy);
-		glTexCoord2d(1, 0); glVertex2d(w - cx, 0 - cy);
-		glTexCoord2d(1, 1); glVertex2d(w - cx, h - cy);
-		glTexCoord2d(0, 1); glVertex2d(0 - cx, h - cy);
+		glTexCoord2d(tx[0], ty[0]); glVertex2d(0 - cx, 0 - cy);
+		glTexCoord2d(tx[1], ty[0]); glVertex2d(w - cx, 0 - cy);
+		glTexCoord2d(tx[1], ty[1]); glVertex2d(w - cx, h - cy);
+		glTexCoord2d(tx[0], ty[1]); glVertex2d(0 - cx, h - cy);
 	glEnd();
 	
 	//SDL_BlitSurface(source->surface, NULL, bitmap->surface, NULL);
@@ -554,6 +668,9 @@ PHP_METHOD(Screen, init)
 		{
 			BitmapStruct *bmp = zend_object_store_get_object(return_value, TSRMLS_C);
 			bmp->surface = screen;
+			bmp->w = screen->w;
+			bmp->h = screen->h;
+			bmp->cx = bmp->cy = bmp->x = bmp->y = 0;
 		}
 	} else {
 		RETURN_FALSE;
@@ -659,6 +776,8 @@ PM_METHODS(Bitmap)
 	PHP_ME_AI(Bitmap, center     , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, clear      , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, blit       , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Bitmap, slice      , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Bitmap, split      , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, fromFile   , ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, fromString , ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME_END
@@ -716,13 +835,46 @@ static void register_classes(TSRMLS_D)
 	{ // Keyboard
 		PM_CLASS_INIT("Keyboard", Keyboard_Methods);
 		PM_CLASS_REGISTER();
+		
+		#define DEFINE_KEY_EX(KEY, VAL) CLASS_REGISTER_CONSTANT_INT(#KEY, SDLK_##VAL)
+		#define DEFINE_KEY(KEY) CLASS_REGISTER_CONSTANT_INT(#KEY, SDLK_##KEY)
 
 		// Constants
-		CLASS_REGISTER_CONSTANT_INT("UP", SDLK_UP);
-		CLASS_REGISTER_CONSTANT_INT("DOWN", SDLK_DOWN);
-		CLASS_REGISTER_CONSTANT_INT("LEFT", SDLK_LEFT);
-		CLASS_REGISTER_CONSTANT_INT("RIGHT", SDLK_RIGHT);
-		CLASS_REGISTER_CONSTANT_INT("ESC", SDLK_ESCAPE);
+		DEFINE_KEY(UP);
+		DEFINE_KEY(DOWN);
+		DEFINE_KEY(LEFT);
+		DEFINE_KEY(RIGHT);
+		DEFINE_KEY(ESCAPE);
+		DEFINE_KEY(SPACE);
+		DEFINE_KEY(TAB);
+		DEFINE_KEY_EX(ESC, ESCAPE);
+		DEFINE_KEY_EX(ENTER, RETURN);
+		DEFINE_KEY_EX(A, a);
+		DEFINE_KEY_EX(B, b);
+		DEFINE_KEY_EX(C, c);
+		DEFINE_KEY_EX(D, d);
+		DEFINE_KEY_EX(E, e);
+		DEFINE_KEY_EX(F, f);
+		DEFINE_KEY_EX(G, g);
+		DEFINE_KEY_EX(H, h);
+		DEFINE_KEY_EX(I, i);
+		DEFINE_KEY_EX(J, j);
+		DEFINE_KEY_EX(K, k);
+		DEFINE_KEY_EX(L, l);
+		DEFINE_KEY_EX(M, m);
+		DEFINE_KEY_EX(N, n);
+		DEFINE_KEY_EX(O, o);
+		DEFINE_KEY_EX(P, p);
+		DEFINE_KEY_EX(Q, q);
+		DEFINE_KEY_EX(R, r);
+		DEFINE_KEY_EX(S, s);
+		DEFINE_KEY_EX(T, t);
+		DEFINE_KEY_EX(U, u);
+		DEFINE_KEY_EX(V, v);
+		DEFINE_KEY_EX(W, w);
+		DEFINE_KEY_EX(X, x);
+		DEFINE_KEY_EX(Y, y);
+		DEFINE_KEY_EX(Z, z);
 	}
 
 	{ // Mouse
