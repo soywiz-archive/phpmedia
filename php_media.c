@@ -763,6 +763,20 @@ PHP_METHOD(Keyboard, down)
 	}
 }
 
+// Mouse::show()
+PHP_METHOD_ARGS(Mouse, show) ZEND_END_ARG_INFO()
+PHP_METHOD(Mouse, show)
+{
+	SDL_ShowCursor(SDL_ENABLE);
+}
+
+// Mouse::hide()
+PHP_METHOD_ARGS(Mouse, hide) ZEND_END_ARG_INFO()
+PHP_METHOD(Mouse, hide)
+{
+	SDL_ShowCursor(SDL_DISABLE);
+}
+
 PHP_FUNCTION(dummy)
 {
 	RETURN_LONG(0);
@@ -800,6 +814,8 @@ PM_METHODS(Keyboard)
 
 PM_METHODS(Mouse)
 {
+	PHP_ME_AI(Mouse, show, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Mouse, hide, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
 	PHP_ME_END
 };
 
