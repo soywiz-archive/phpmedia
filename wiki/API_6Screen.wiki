@@ -1,4 +1,6 @@
 == class Screen ==
 <font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Screen4init init] ($w<font color="#999"> = 640</font>, $h<font color="#999"> = 480</font>, $fullscreen<font color="#999"> = false</font>) : <font color="#a88">[API_6Bitmap Bitmap]</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Screen5frame frame] () : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Screen5title title] ($title<font color="#999"> = NULL</font>) : <font color="#a88">void</font>
 </font>

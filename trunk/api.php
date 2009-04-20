@@ -19,6 +19,16 @@ final class Screen {
 	 * @return Bitmap
 	 */
 	static public function init($w = 640, $h = 480, $fullscreen = false) { } // Bitmap $screen
+
+	/**
+	 * Swaps the buffers. Clears the offscreen buffer. Update events. Wait until the frame is finished.
+	 */
+	static public function frame() { }
+
+	/**
+	 * Set or retrieves the title of the window.
+	 */
+	static public function title($title = null) { }
 }
 
 /**
@@ -86,13 +96,34 @@ final class Audio {
  *
  */
 final class Bitmap {
-	public $parent;
+	//public $parent;
 	public $x, $y;
 	public $w, $h;
 	public $cx, $cy;
 
+	/**
+	 * Creates an empty bitmap of the specified size.
+	 *
+	 * @param int $w Width.
+	 * @param int $h Height.
+	 * @return Bitmap
+	 */
 	public function __construct($w, $h) { }
+
+	/**
+	 * Creates a bitmap from a file.
+	 *
+	 * @param string $filename File name.
+	 * @return Bitmap
+	 */
 	static public function fromFile($filename) { }
+	
+	/**
+	 * Creates a bitmap from a image stored in the string.
+	 *
+	 * @param string $string Image data.
+	 * @return Bitmap
+	 */
 	static public function fromString($string) { }
 
 	/**
@@ -100,7 +131,7 @@ final class Bitmap {
 	 *
 	 * @return Bitmap
 	 */
-	public function duplicate() { }
+	//public function duplicate() { }
 
 	/**
 	 * Clones the Bitmap without cloning the texture. Useful for using the same texture with different center addresses.
@@ -112,6 +143,10 @@ final class Bitmap {
 	/**
 	 * Makes a slice of the bitmap without duplicating the texture.
 	 *
+	 * @param float $x Coordinate x.
+	 * @param float $y Coordinate y.
+	 * @param float $w Width.
+	 * @param float $h Height.
 	 * @return Bitmap
 	 */
 	public function slice($x, $y, $w, $h) { }
@@ -119,14 +154,33 @@ final class Bitmap {
 	/**
 	 * Makes an array of slices of the bitmap without duplicating the texture.
 	 *
+	 * @param float $w Width.
+	 * @param float $h Height.
 	 * @return Array
 	 */
 	public function split($w, $h) { } // Like slice
 
 	/**
 	 * Clears the bitmap with the specified color.
+	 *
+	 * @param float $r Red.
+	 * @param float $g Green.
+	 * @param float $b Blue.
+	 * @param float $a Alpha.
 	 */
-	public function clear($color = NULL) { } // array(0.0, 0.0, 0.0, 0.0)
+	public function clear($r = 0.0, $g = 0.0, $b = 0.0, $a = 0.0) { } // array(0.0, 0.0, 0.0, 0.0)
+
+	/**
+	 * Blits the specified bitmap in the current one.
+	 *
+	 * @param Bitmap $src Source bitmap.
+	 * @param float $x Red.
+	 * @param float $y Green.
+	 * @param float $size Size.
+	 * @param float $rotation Rotation.
+	 * @param float $alpha Alpha.
+	 * @param Shader $shader PixelShader.
+	 */
 	public function blit(Bitmap $src, $x, $y, $size = 1.0, $rotation = 0, $alpha = 1.0, Shader $shader = NULL) { }
 }
 
@@ -138,5 +192,43 @@ final class Shader {
 	public $params = array();
 
 	public function __construct($string) { }
+}
+
+/**
+ * Keyboard class
+ *
+ */
+final class Keyboard {
+	/**
+	 * Returns if the key is currently pressed.
+	 *
+	 * @param int $key Key to check.
+	 * @return bool
+	 */
+	static public function pressed($key) { }
+
+	/**
+	 * Returns if the key is currently down.
+	 *
+	 * @param int $key Key to check.
+	 * @return bool
+	 */
+	static public function down($key) { }
+}
+
+/**
+ * Mouse class
+ *
+ */
+final class Mouse {
+	/**
+	 * Shows the mouse cursor.
+	 */
+	static public function show() { }
+
+	/**
+	 * Hide the mouse cursor.
+	 */
+	static public function hide() { }
 }
 ?>
