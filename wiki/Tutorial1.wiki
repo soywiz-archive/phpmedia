@@ -1,0 +1,32 @@
+#summary First tutorial
+
+phpMedia
+
+{{{
+<?php
+    $screen = Screen::init(640, 480);
+?>
+}}}
+
+{{{
+<?php
+    $screen = Screen::init(640, 480);
+
+    while (true) {
+        Screen::frame();
+    }
+?>
+}}}
+
+{{{
+<?php
+    $screen = Screen::init(640, 480);
+
+    $bmp = Bitmap::fromFile('sample.png');
+
+    while (true) {
+        $screen->blit($bmp);
+        Screen::frame();
+    }
+?>
+}}}
