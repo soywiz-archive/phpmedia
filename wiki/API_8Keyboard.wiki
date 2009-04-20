@@ -1,4 +1,8 @@
 == class Keyboard ==
+/**
+ * Class to control keyboard operations.
+ */
+
 <font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_8Keyboard7pressed pressed] ($key) : <font color="#a88">bool</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_8Keyboard4down down] ($key) : <font color="#a88">bool</font>

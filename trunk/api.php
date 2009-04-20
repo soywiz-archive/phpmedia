@@ -79,8 +79,7 @@ final class SoundEffect {
 }
 
 /**
- * Audio class
- *
+ * Class to control the audio system.
  */
 final class Audio {
 	/**
@@ -92,8 +91,7 @@ final class Audio {
 }
 
 /**
- * Bitmap class
- *
+ * Class to handle, modify and draw images.
  */
 final class Bitmap {
 	//public $parent;
@@ -185,8 +183,7 @@ final class Bitmap {
 }
 
 /**
- * Shader class
- *
+ * Class to specify programs to execute for each pixel.
  */
 final class Shader {
 	public $params = array();
@@ -195,8 +192,7 @@ final class Shader {
 }
 
 /**
- * Keyboard class
- *
+ * Class to control keyboard operations.
  */
 final class Keyboard {
 	/**
@@ -217,8 +213,7 @@ final class Keyboard {
 }
 
 /**
- * Mouse class
- *
+ * Class to control mouse operations.
  */
 final class Mouse {
 	/**

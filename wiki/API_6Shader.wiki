@@ -1,4 +1,8 @@
 == class Shader ==
+/**
+ * Class to specify programs to execute for each pixel.
+ */
+
 <font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Shader11__construct __construct] ($string) : <font color="#a88">void</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Shader6params $params]

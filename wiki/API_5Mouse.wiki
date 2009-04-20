@@ -1,4 +1,8 @@
 == class Mouse ==
+/**
+ * Class to control mouse operations.
+ */
+
 <font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Mouse4show show] () : <font color="#a88">void</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Mouse4hide hide] () : <font color="#a88">void</font>

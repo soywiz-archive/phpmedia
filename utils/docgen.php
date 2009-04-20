@@ -54,6 +54,7 @@
 		
 		$fclass = fopen("{$path_wiki}/" . mangle($class->getName()) . ".wiki", 'wb');
 		fprintf($fclass, "== class %s ==\n", $class->getName());
+		fprintf($fclass, "%s\n\n", $class->getDocComment());
 		fprintf($fclass, "<font face=\"Lucida Console\">\n");
 
 		foreach ($class->getMethods() as $method) {

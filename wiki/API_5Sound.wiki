@@ -1,4 +1,9 @@
 == class Sound ==
+/**
+ * Sound class
+ *
+ */
+
 <font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_5Sound5slice slice] ($start<font color="#999"> = 0</font>, $length<font color="#999"> = NULL</font>) : <font color="#a88">void</font>
 </font>
