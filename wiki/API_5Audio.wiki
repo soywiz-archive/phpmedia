@@ -1,7 +1,5 @@
 == class Audio ==
-/**
- * Class to control the audio system.
- */
+Class to control the audio system.
 
 <font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Audio4init init] ($frequency<font color="#999"> = 22050</font>) : <font color="#a88">void</font>

@@ -44,6 +44,15 @@
 		return "[http://phpmedia.googlecode.com/svn/www/icons/{$name}.png]";
 	}
 	
+	function ParseDoc($doc) {
+		$lines = array();
+		foreach (preg_split("/[\n\r]+/", $doc) as $line) {
+			$line = ltrim($line, " \t*/");
+			if (strlen($line)) $lines[] = $line;
+		}
+		return implode("\n", $lines);
+	}
+	
 	if (!($ftoc = fopen("{$path_wiki}/API_TOC.wiki", 'wb'))) {
 		die("Error\n");
 	}
@@ -54,7 +63,7 @@
 		
 		$fclass = fopen("{$path_wiki}/" . mangle($class->getName()) . ".wiki", 'wb');
 		fprintf($fclass, "== class %s ==\n", $class->getName());
-		fprintf($fclass, "%s\n\n", $class->getDocComment());
+		fprintf($fclass, "%s\n\n", ParseDoc($class->getDocComment()));
 		fprintf($fclass, "<font face=\"Lucida Console\">\n");
 
 		foreach ($class->getMethods() as $method) {

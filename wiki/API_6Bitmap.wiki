@@ -1,7 +1,5 @@
 == class Bitmap ==
-/**
- * Class to handle, modify and draw images.
- */
+Class to handle, modify and draw images.
 
 <font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap11__construct __construct] ($w, $h) : <font color="#a88">[API_6Bitmap Bitmap]</font>

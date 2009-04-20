@@ -1,8 +1,5 @@
 == class SoundEffect ==
-/**
- * SoundEffect class
- *
- */
+SoundEffect class
 
 <font face="Lucida Console">
 </font>
