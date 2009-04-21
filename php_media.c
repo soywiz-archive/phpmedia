@@ -7,6 +7,8 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_ttf.h>
 #include <GL/gl.h>
 #include <GL/glext.h>
 
@@ -783,6 +785,15 @@ PHP_METHOD(Mouse, hide)
 	SDL_ShowCursor(SDL_DISABLE);
 }
 
+// Audio::init()
+PHP_METHOD_ARGS(Audio, init) ARG_INFO(frequency) ZEND_END_ARG_INFO()
+PHP_METHOD(Audio, init)
+{
+	int frequency = 22050;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "|l", &frequency) == FAILURE) RETURN_FALSE;
+	Mix_OpenAudio(frequency, MIX_DEFAULT_FORMAT, 2, 1024);
+}
+
 PHP_FUNCTION(dummy)
 {
 	RETURN_LONG(0);
@@ -827,6 +838,7 @@ PM_METHODS(Mouse)
 
 PM_METHODS(Audio)
 {
+	PHP_ME_AI(Audio, init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
 	PHP_ME_END
 };
 
@@ -914,6 +926,11 @@ static void register_classes(TSRMLS_D)
 		CLASS_REGISTER_CONSTANT_INT("RIGHT", 2);
 		CLASS_REGISTER_CONSTANT_INT("SCROLL_UP", 3);
 		CLASS_REGISTER_CONSTANT_INT("SCROLL_DOWN", 4);
+	}
+
+	{ // Audio
+		PM_CLASS_INIT("Audio", Audio_Methods);
+		PM_CLASS_REGISTER();
 	}
 }
 
