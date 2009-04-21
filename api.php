@@ -226,4 +226,10 @@ final class Mouse {
 	 */
 	static public function hide() { }
 }
+
+final class Font {
+	static public function fromFile($filename, $size) { }
+	
+	public function render($text, $x, $y); // Bitmap
+}
 ?>
