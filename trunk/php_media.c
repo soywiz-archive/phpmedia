@@ -1,5 +1,6 @@
 ﻿#include "php.h"
 #include "php_ini.h"
+#include "zend_exceptions.h"
 #include "SAPI.h"
 #include "ext/standard/info.h"
 #include <windows.h>
@@ -234,10 +235,10 @@ void BitmapPrepare(BitmapStruct *bitmap) {
 	SDL_BlitSurface(bitmap->surface, 0, surfaceogl, 0);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, surfaceogl->w, surfaceogl->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surfaceogl->pixels);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glEnable(GL_CLAMP_TO_EDGE);
@@ -261,7 +262,10 @@ static void Bitmap__ObjectDelete(void *object, TSRMLS_D)
 	{
 		if (bitmap->surface)
 		{
-			glDeleteTextures(1, &bitmap->gltex);
+			if (bitmap->surface->refcount <= 1)
+			{
+				glDeleteTextures(1, &bitmap->gltex);
+			}
 			SDL_FreeSurface(bitmap->surface);
 		}
 		zend_object_std_dtor(&bitmap->std, TSRMLS_C);
@@ -472,6 +476,7 @@ PHP_METHOD(Bitmap, fromFile)
 		bitmap->h = surface->h;
 		BitmapPrepare(bitmap);
 	} else {
+		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0, TSRMLS_C, "Can't load image '%s'", name);
 		RETURN_FALSE;
 	}
 }
@@ -494,6 +499,7 @@ PHP_METHOD(Bitmap, fromString)
 		bitmap->h = surface->h;
 		BitmapPrepare(bitmap);
 	} else {
+		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0, TSRMLS_C, "Can't load image from string");
 		RETURN_FALSE;
 	}
 }
@@ -816,6 +822,11 @@ PM_METHODS(Mouse)
 {
 	PHP_ME_AI(Mouse, show, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
 	PHP_ME_AI(Mouse, hide, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_END
+};
+
+PM_METHODS(Audio)
+{
 	PHP_ME_END
 };
 
