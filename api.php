@@ -79,6 +79,35 @@ final class SoundEffect {
 }
 
 /**
+ * Class to control the music subsystem.
+ */
+final class Music {
+	/**
+	 * Starts playing a song. In WAVE, MOD, MIDI, OGG, MP3.
+	 *
+	 * @param string $file     Filename of the song.
+	 * @param int    $loops    Number of loops.
+	 * @param float  $fadeIn   Number seconds for the FadeIn transition.
+	 * @param float  $position Number seconds to start playing the song.
+	 */
+	static public function play($file, $loops = -1, $fadeIn = 1, $position = 0) { }
+
+	/**
+	 * Stops the song with an optional FadeOut transition.
+	 *
+	 * @param float  $fadeOut   Number seconds for the FadeOut transition.
+	 */
+	static public function stop($fadeOut = 1) { }
+
+	/**
+	 * Returns if the song is playing.
+	 *
+	 * @return bool
+	 */
+	static public function playing() { }
+}
+
+/**
  * Class to control the audio system.
  */
 final class Audio {

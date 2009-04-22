@@ -12,9 +12,17 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 
+Mix_Music *music = NULL;
 SDL_Surface *screen;
 int keys_status[SDLK_LAST];
 int keys_pressed[SDLK_LAST];
+
+void FrameProcess() {
+	if (music != NULL && !Mix_PlayingMusic()) {
+		Mix_FreeMusic(music);
+		music = NULL;
+	}
+}
 
 #define PHP_METHODS_NAME(CLASS) CLASS##_Methods
 #define PHP_METHOD_NAME_ARGINFO(CLASS, METHOD) arginfo_##CLASS##METHOD
@@ -724,6 +732,7 @@ PHP_METHOD(Screen, frame)
 	SDL_GL_SwapBuffers();
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	FrameProcess();
 
 	return;
 }
@@ -788,13 +797,47 @@ PHP_METHOD(Mouse, hide)
 	SDL_ShowCursor(SDL_DISABLE);
 }
 
-// Audio::init()
+// Audio::init($frequency = 22050)
 PHP_METHOD_ARGS(Audio, init) ARG_INFO(frequency) ZEND_END_ARG_INFO()
 PHP_METHOD(Audio, init)
 {
 	int frequency = 22050;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "|l", &frequency) == FAILURE) RETURN_FALSE;
+	SDL_InitSubSystem(SDL_INIT_AUDIO);
 	Mix_OpenAudio(frequency, MIX_DEFAULT_FORMAT, 2, 1024);
+}
+
+// Music::play($file, $loops = -1, $fadeIn = 1, $position = 0)
+PHP_METHOD_ARGS(Music, play) ARG_INFO(frequency) ARG_INFO(loops) ARG_INFO(fadeIn) ARG_INFO(position) ZEND_END_ARG_INFO()
+PHP_METHOD(Music, play)
+{
+	char *str = NULL; int str_len = 0;
+	int loops; double fadeIn = 0, position = 0;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s|ldd", &str, &str_len, &loops, &fadeIn, &position) == FAILURE) RETURN_FALSE;
+	if (music != NULL) {
+		Mix_HaltMusic();
+		Mix_FreeMusic(music);
+	}
+	music = Mix_LoadMUS(str);
+	Mix_FadeInMusicPos(music, loops, (int)(fadeIn) * 1000, position);
+}
+
+// Music::stop($fadeOut = 0)
+PHP_METHOD_ARGS(Music, stop) ARG_INFO(fadeOut) ZEND_END_ARG_INFO()
+PHP_METHOD(Music, stop)
+{
+	double fadeOut = 0;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "|d", &fadeOut) == FAILURE) RETURN_FALSE;
+	Mix_FadeOutMusic((int)(fadeOut) * 1000);
+}
+
+// Music::playing()
+PHP_METHOD_ARGS(Music, playing) ZEND_END_ARG_INFO()
+PHP_METHOD(Music, playing)
+{
+	double fadeOut = 0;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "|d", &fadeOut) == FAILURE) RETURN_FALSE;
+	Mix_FadeOutMusic((int)fadeOut);
 }
 
 // Math::clamp(&$var, $min, $max)
@@ -869,6 +912,14 @@ PM_METHODS(Mouse)
 PM_METHODS(Audio)
 {
 	PHP_ME_AI(Audio, init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_END
+};
+
+PM_METHODS(Music)
+{
+	PHP_ME_AI(Music, play, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Music, stop, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Music, playing, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
 	PHP_ME_END
 };
 
@@ -966,6 +1017,11 @@ static void register_classes(TSRMLS_D)
 
 	{ // Audio
 		PM_CLASS_INIT(Audio);
+		PM_CLASS_REGISTER();
+	}
+
+	{ // Music
+		PM_CLASS_INIT(Music);
 		PM_CLASS_REGISTER();
 	}
 
