@@ -82,6 +82,7 @@
 				if ($cclass) {
 					$param .= mangle_link($cclass->getName()) . ' ';
 				}
+				if ($parameter->isPassedByReference()) $param .= '&';
 				$param .= '$' . $parameter->getName();
 				if ($parameter->isDefaultValueAvailable()) {
 					$param .= '<font color="#999"> = ' . str_replace("\n", '', var_export($parameter->getDefaultValue(), true) . '</font>');
