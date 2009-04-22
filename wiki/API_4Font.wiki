@@ -1,0 +1,7 @@
+== class Font ==
+Class to draw texts on bitmaps.
+
+<font face="Lucida Console">
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Font8fromFile fromFile] ($filename, $size) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_4Font6render render] ($text, $x, $y) : <font color="#a88">void</font>
+</font>

@@ -39,3 +39,8 @@
   * [http://phpmedia.googlecode.com/svn/www/icons/class.png][API_5Mouse Mouse]
     * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Mouse4show show]
     * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Mouse4hide hide]
+  * [http://phpmedia.googlecode.com/svn/www/icons/class.png][API_4Font Font]
+    * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Font8fromFile fromFile]
+    * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_4Font6render render]
+  * [http://phpmedia.googlecode.com/svn/www/icons/class.png][API_4Math Math]
+    * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Math5clamp clamp]

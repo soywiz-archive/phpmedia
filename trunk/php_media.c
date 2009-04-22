@@ -16,23 +16,26 @@ SDL_Surface *screen;
 int keys_status[SDLK_LAST];
 int keys_pressed[SDLK_LAST];
 
+#define PHP_METHODS_NAME(CLASS) CLASS##_Methods
+#define PHP_METHOD_NAME_ARGINFO(CLASS, METHOD) arginfo_##CLASS##METHOD
+
 //zval *object = getThis();
 #define GET_THIS_TYPE(TYPE, NAME) TYPE *NAME = (TYPE *)zend_object_store_get_object(getThis(), TSRMLS_C);
 #define THROW    php_set_error_handling(EH_THROW, zend_exception_get_default(), TSRMLS_C);
 #define NO_THROW php_set_error_handling(EH_NORMAL, NULL, TSRMLS_C);
 #define STRUCT_CREATE(TYPE, VAR) VAR = emalloc(sizeof(TYPE)); memset(VAR, 0, sizeof(TYPE));
-#define PHP_METHOD_ARGS(CLASS, METHOD) ZEND_BEGIN_ARG_INFO_EX(arginfo_##CLASS##METHOD, 0, 0, 1)
+#define PHP_METHOD_ARGS(CLASS, METHOD) ZEND_BEGIN_ARG_INFO_EX(PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), 0, 0, 1)
 #define ARG_INFO(name) ZEND_ARG_INFO(0, name)
 #define THIS_BITMAP GET_THIS_TYPE(BitmapStruct, bitmap);
-#define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, arginfo_##CLASS##METHOD, ATT)
-#define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, arginfo_##CLASS##METHOD, ATT)
+#define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), ATT)
+#define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), ATT)
 #define PHP_ME_END {NULL, NULL, NULL}
 #define PHP_FE_END {NULL, NULL, NULL}
-#define PM_METHODS(CLASS) const zend_function_entry CLASS##_Methods[] =
+#define PM_METHODS(CLASS) const zend_function_entry PHP_METHODS_NAME(CLASS)[] =
 #define CLONE_COPY_FIELD(field) new_obj->field = old_obj->field;
 #define CLASS_REGISTER_CONSTANT_STR(CONST, VALUE) zend_declare_class_constant_stringl(CurrentClassEntry, (CONST), sizeof(CONST) - 1, (VALUE), sizeof(VALUE) - 1, TSRMLS_C);
 #define CLASS_REGISTER_CONSTANT_INT(CONST, VALUE) zend_declare_class_constant_long(CurrentClassEntry, (CONST), sizeof(CONST) - 1, VALUE, TSRMLS_C);
-#define PM_CLASS_INIT(CLASS, METHODS) INIT_CLASS_ENTRY(ClassEntry, CLASS, METHODS);
+#define PM_CLASS_INIT(CLASS) INIT_CLASS_ENTRY(ClassEntry, #CLASS, PHP_METHODS_NAME(CLASS));
 #define PM_CLASS_REGISTER() CurrentClassEntry = zend_register_internal_class_ex(&ClassEntry, NULL, NULL, TSRMLS_C);
 #define PM_HANDLERS_INIT(TYPE) memcpy(CurrentHandlers = &TYPE, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 #define PM_HANDLERS_ADD(TYPE, FUNC) CurrentHandlers->TYPE = FUNC;
@@ -794,6 +797,33 @@ PHP_METHOD(Audio, init)
 	Mix_OpenAudio(frequency, MIX_DEFAULT_FORMAT, 2, 1024);
 }
 
+// Math::clamp(&$var, $min, $max)
+PHP_METHOD_ARGS(Math, clamp) ARG_INFO(var) ARG_INFO(min) ARG_INFO(max) ZEND_END_ARG_INFO()
+PHP_METHOD(Math, clamp)
+{
+	zval **var, *min, *max;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Zzz", &var, &min, &max) == FAILURE) RETURN_FALSE;
+	switch (Z_TYPE(**var)) {
+		case IS_DOUBLE: {
+			double min, max;
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Zdd", &var, &min, &max) == FAILURE) RETURN_FALSE;
+			if (Z_DVAL(**var) < min) Z_DVAL(**var) = min;
+			if (Z_DVAL(**var) > max) Z_DVAL(**var) = max;
+		} break;
+		case IS_LONG: {
+			int min, max;
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Zll", &var, &min, &max) == FAILURE) RETURN_FALSE;
+			if (Z_LVAL(**var) < min) Z_LVAL(**var) = min;
+			if (Z_LVAL(**var) > max) Z_LVAL(**var) = max;
+		} break;
+		default: {
+			int min, max;
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Zll", &var, &min, &max) == FAILURE) RETURN_FALSE;
+			ZVAL_LONG(*var, min);
+		} break;
+	}
+}
+
 PHP_FUNCTION(dummy)
 {
 	RETURN_LONG(0);
@@ -842,6 +872,12 @@ PM_METHODS(Audio)
 	PHP_ME_END
 };
 
+PM_METHODS(Math)
+{
+	PHP_ME_AI(Math, clamp, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_END
+};
+
 const zend_function_entry module_functions[] =
 {
 	PHP_FE(dummy, NULL)
@@ -854,7 +890,7 @@ static void register_classes(TSRMLS_D)
 	zend_object_handlers *CurrentHandlers;
 
 	{ // Bitmap
-		PM_CLASS_INIT("Bitmap", Bitmap_Methods);
+		PM_CLASS_INIT(Bitmap);
 		PM_CLASS_ADD(create_object, Bitmap__ObjectNew)
 		PM_CLASS_REGISTER();
 		Bitmap_ClassEntry = CurrentClassEntry;
@@ -864,7 +900,7 @@ static void register_classes(TSRMLS_D)
 	}
 
 	{ // Screen
-		PM_CLASS_INIT("Screen", Screen_Methods);
+		PM_CLASS_INIT(Screen);
 		PM_CLASS_REGISTER();
 
 		// Constants
@@ -872,7 +908,7 @@ static void register_classes(TSRMLS_D)
 	}
 
 	{ // Keyboard
-		PM_CLASS_INIT("Keyboard", Keyboard_Methods);
+		PM_CLASS_INIT(Keyboard);
 		PM_CLASS_REGISTER();
 		
 		#define DEFINE_KEY_EX(KEY, VAL) CLASS_REGISTER_CONSTANT_INT(#KEY, SDLK_##VAL)
@@ -917,7 +953,7 @@ static void register_classes(TSRMLS_D)
 	}
 
 	{ // Mouse
-		PM_CLASS_INIT("Mouse", Mouse_Methods);
+		PM_CLASS_INIT(Mouse);
 		PM_CLASS_REGISTER();
 
 		// Constants
@@ -929,7 +965,12 @@ static void register_classes(TSRMLS_D)
 	}
 
 	{ // Audio
-		PM_CLASS_INIT("Audio", Audio_Methods);
+		PM_CLASS_INIT(Audio);
+		PM_CLASS_REGISTER();
+	}
+
+	{ // Math
+		PM_CLASS_INIT(Math);
 		PM_CLASS_REGISTER();
 	}
 }

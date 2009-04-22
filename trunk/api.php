@@ -227,9 +227,26 @@ final class Mouse {
 	static public function hide() { }
 }
 
+/**
+ * Class to draw texts on bitmaps.
+ */
 final class Font {
 	static public function fromFile($filename, $size) { }
 	
-	public function render($text, $x, $y); // Bitmap
+	public function render($text, $x, $y) { } // Bitmap
+}
+
+/**
+ * Class for extra math operations.
+ */
+final class Math {
+	/**
+	 * Clamps a variable passed by reference by a minimum and maximum value.
+	 *
+	 * @param mixed &$var Variable to check and update.
+	 * @param mixed $min Minimum value.
+	 * @param mixed $max Maximum value.
+	 */
+	static public function clamp(&$var, $min, $max) { }
 }
 ?>
