@@ -1,3 +1,17 @@
+#include "php.h"
+#include "php_ini.h"
+#include "zend_exceptions.h"
+#include "SAPI.h"
+#include "ext/standard/info.h"
+#include <windows.h>
+#include <SDL.h>
+#include <SDL_syswm.h>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_ttf.h>
+#include <GL/gl.h>
+#include <GL/glext.h>
+
 typedef struct {
 	SDL_Surface *surface;
 	GLint gltex;
@@ -18,6 +32,11 @@ typedef struct _BitmapStruct {
 	int x, y, w, h;
 } BitmapStruct;
 
+typedef struct _SoundStruct {
+	zend_object std;
+	Mix_Chunk *chunk;
+} SoundStruct;
+
 #define PHP_METHODS_NAME(CLASS) CLASS##_Methods
 #define PHP_METHOD_NAME_ARGINFO(CLASS, METHOD) arginfo_##CLASS##METHOD
 
@@ -29,6 +48,7 @@ typedef struct _BitmapStruct {
 #define PHP_METHOD_ARGS(CLASS, METHOD) ZEND_BEGIN_ARG_INFO_EX(PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), 0, 0, 1)
 #define ARG_INFO(name) ZEND_ARG_INFO(0, name)
 #define THIS_BITMAP GET_THIS_TYPE(BitmapStruct, bitmap);
+#define THIS_SOUND GET_THIS_TYPE(SoundStruct, sound);
 #define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), ATT)
 #define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), ATT)
 #define PHP_ME_END {NULL, NULL, NULL}
