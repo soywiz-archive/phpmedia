@@ -1,17 +1,4 @@
-﻿#include "php.h"
-#include "php_ini.h"
-#include "zend_exceptions.h"
-#include "SAPI.h"
-#include "ext/standard/info.h"
-#include <windows.h>
-#include <SDL.h>
-#include <SDL_syswm.h>
-#include <SDL_image.h>
-#include <SDL_mixer.h>
-#include <SDL_ttf.h>
-#include <GL/gl.h>
-#include <GL/glext.h>
-#include "php_media.h"
+﻿#include "php_media.h"
 
 Mix_Music *music = NULL;
 SDL_Surface *screen;
@@ -19,7 +6,9 @@ int keys_status[SDLK_LAST];
 int keys_pressed[SDLK_LAST];
 
 static zend_object_handlers Bitmap_Handlers;
+static zend_object_handlers Sound_Handlers;
 static zend_class_entry    *Bitmap_ClassEntry;
+static zend_class_entry    *Sound_ClassEntry;
 
 int __texPow2 = 0;
 int __texRectangle = 0;
@@ -85,6 +74,13 @@ PM_METHODS(Mouse)
 PM_METHODS(Audio)
 {
 	PHP_ME_AI(Audio, init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_END
+};
+
+PM_METHODS(Sound)
+{
+	PHP_ME_AI(Sound, fromFile, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Sound, play, ZEND_ACC_PUBLIC | ZEND_ACC_FINAL)
 	PHP_ME_END
 };
 
@@ -191,6 +187,15 @@ static void register_classes(TSRMLS_D)
 	{ // Audio
 		PM_CLASS_INIT(Audio);
 		PM_CLASS_REGISTER();
+	}
+
+	{ // Sound
+		PM_CLASS_INIT(Sound);
+		PM_CLASS_ADD(create_object, Sound__ObjectNew)
+		PM_CLASS_REGISTER();
+		Sound_ClassEntry = CurrentClassEntry;
+		PM_HANDLERS_INIT(Sound_Handlers);
+		PM_HANDLERS_ADD(clone_obj, Sound__ObjectClone);
 	}
 
 	{ // Music

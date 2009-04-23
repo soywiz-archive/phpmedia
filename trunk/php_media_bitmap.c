@@ -1,19 +1,11 @@
-static void Bitmap__ObjectDelete(void *object, TSRMLS_D)
+static void Bitmap__ObjectDelete(BitmapStruct *bitmap, TSRMLS_D)
 {
-	BitmapStruct *bitmap = (BitmapStruct *)object;
-	{
-		if (bitmap->surface)
-		{
-			if (bitmap->surface->refcount <= 1)
-			{
-				glDeleteTextures(1, &bitmap->gltex);
-			}
-			SDL_FreeSurface(bitmap->surface);
-		}
-		zend_object_std_dtor(&bitmap->std, TSRMLS_C);
-		//printf("free\n");
+	if (bitmap->surface) {
+		if (bitmap->surface->refcount <= 1) glDeleteTextures(1, &bitmap->gltex);
+		SDL_FreeSurface(bitmap->surface);
 	}
-	efree(object);
+	zend_object_std_dtor(&bitmap->std, TSRMLS_C);
+	efree(bitmap);
 }
 
 static zend_object_value Bitmap__ObjectNew_ex(zend_class_entry *class_type, BitmapStruct **ptr, TSRMLS_D)
@@ -206,7 +198,7 @@ PHP_METHOD(Bitmap, fromFile)
 	if (surface = IMG_Load(name)) {
 		BitmapStruct *bitmap;
 		ObjectInit(Bitmap_ClassEntry, return_value, TSRMLS_C);
-		bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
+		bitmap = zend_object_store_get_object(return_value, TSRMLS_C);bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
 		bitmap->surface = surface;
 		bitmap->x = bitmap->y = bitmap->cx = bitmap->cy = 0;
 		bitmap->w = surface->w;
@@ -214,7 +206,6 @@ PHP_METHOD(Bitmap, fromFile)
 		BitmapPrepare(bitmap);
 	} else {
 		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0, TSRMLS_C, "Can't load image '%s'", name);
-		RETURN_FALSE;
 	}
 }
 
