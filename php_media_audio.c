@@ -1,6 +1,6 @@
 static void Sound__ObjectDelete(SoundStruct *sound, TSRMLS_D)
 {
-	if (sound->chunk)
+	if (sound->chunk != NULL)
 	{
 		Mix_FreeChunk(sound->chunk);
 	}
@@ -64,7 +64,7 @@ PHP_METHOD(Sound, fromFile)
 		sound = zend_object_store_get_object(return_value, TSRMLS_C);
 		sound->chunk = chunk;
 	} else {
-		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0, TSRMLS_C, "Can't load sound '%s'", name);
+		THROWF("Can't load sound '%s'", name);
 	}
 }
 
@@ -85,9 +85,12 @@ PHP_METHOD_ARGS(Audio, init) ARG_INFO(frequency) ZEND_END_ARG_INFO()
 PHP_METHOD(Audio, init)
 {
 	int frequency = 22050;
+	//int frequency = 44100;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "|l", &frequency) == FAILURE) RETURN_FALSE;
 	SDL_InitSubSystem(SDL_INIT_AUDIO);
-	Mix_OpenAudio(frequency, MIX_DEFAULT_FORMAT, 2, 1024);
+	if (Mix_OpenAudio(frequency, MIX_DEFAULT_FORMAT, 2, 1024) != 0) {
+		THROWF("Can't initialize audio");
+	}
 }
 
 // Music::play($file, $loops = -1, $fadeIn = 1, $position = 0)
@@ -100,6 +103,7 @@ PHP_METHOD(Music, play)
 	if (music != NULL) {
 		Mix_HaltMusic();
 		Mix_FreeMusic(music);
+		music = NULL;
 	}
 	music = Mix_LoadMUS(str);
 	Mix_FadeInMusicPos(music, loops, (int)(fadeIn) * 1000, position);

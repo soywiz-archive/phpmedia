@@ -10,18 +10,6 @@ static zend_object_handlers Sound_Handlers;
 static zend_class_entry    *Bitmap_ClassEntry;
 static zend_class_entry    *Sound_ClassEntry;
 
-int __texPow2 = 0;
-int __texRectangle = 0;
-
-int extframebuffer = 0;
-GLuint fbo = -1;
-
-PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatusEXT = NULL;
-PFNGLGENFRAMEBUFFERSEXTPROC        glGenFramebuffersEXT        = NULL;
-PFNGLFRAMEBUFFERTEXTURE2DEXTPROC   glFramebufferTexture2DEXT   = NULL;
-PFNGLDELETEFRAMEBUFFERSEXTPROC     glDeleteFramebuffersEXT     = NULL;
-PFNGLBINDFRAMEBUFFEREXTPROC        glBindFramebufferEXT        = NULL;
-
 #include "php_media_utils.c"
 #include "php_media_bitmap.c"
 #include "php_media_screen.c"
@@ -213,8 +201,8 @@ PHP_MINIT_FUNCTION(module)
 {
 	register_classes(TSRMLS_C);
 	
-	SDL_Init(0);
-	SDL_InitSubSystem(SDL_INIT_VIDEO);
+	if (SDL_Init(0) != 0) THROWF("Can't initialize SDL");
+	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) THROWF("Can't initialize video subsystem");
 	//SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 	SDL_EnableKeyRepeat(120, 50);
 	SDL_EnableUNICODE(1);
