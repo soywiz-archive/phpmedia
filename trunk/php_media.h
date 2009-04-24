@@ -42,8 +42,7 @@ typedef struct _SoundStruct {
 
 //zval *object = getThis();
 #define GET_THIS_TYPE(TYPE, NAME) TYPE *NAME = (TYPE *)zend_object_store_get_object(getThis(), TSRMLS_C);
-#define THROW    php_set_error_handling(EH_THROW, zend_exception_get_default(), TSRMLS_C);
-#define NO_THROW php_set_error_handling(EH_NORMAL, NULL, TSRMLS_C);
+#define THROWF(...) zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0, TSRMLS_C, __VA_ARGS__);
 #define STRUCT_CREATE(TYPE, VAR) VAR = emalloc(sizeof(TYPE)); memset(VAR, 0, sizeof(TYPE));
 #define PHP_METHOD_ARGS(CLASS, METHOD) ZEND_BEGIN_ARG_INFO_EX(PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), 0, 0, 1)
 #define ARG_INFO(name) ZEND_ARG_INFO(0, name)

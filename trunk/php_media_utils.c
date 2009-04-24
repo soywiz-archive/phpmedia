@@ -20,6 +20,18 @@ static zval *ObjectInit(zend_class_entry *pce, zval *object, TSRMLS_D)
 	return object;
 }
 
+int __texPow2 = 0;
+int __texRectangle = 0;
+
+int extframebuffer = 0;
+GLuint fbo = -1;
+
+PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatusEXT = NULL;
+PFNGLGENFRAMEBUFFERSEXTPROC        glGenFramebuffersEXT        = NULL;
+PFNGLFRAMEBUFFERTEXTURE2DEXTPROC   glFramebufferTexture2DEXT   = NULL;
+PFNGLDELETEFRAMEBUFFERSEXTPROC     glDeleteFramebuffersEXT     = NULL;
+PFNGLBINDFRAMEBUFFEREXTPROC        glBindFramebufferEXT        = NULL;
+
 // Eliminamos el FrameBufferObject
 void RemoveFrameBufferObject(void) {
 	if (!fbo) return;

@@ -205,7 +205,7 @@ PHP_METHOD(Bitmap, fromFile)
 		bitmap->h = surface->h;
 		BitmapPrepare(bitmap);
 	} else {
-		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0, TSRMLS_C, "Can't load image '%s'", name);
+		THROWF("Can't load image '%s'", name);
 	}
 }
 
@@ -227,7 +227,7 @@ PHP_METHOD(Bitmap, fromString)
 		bitmap->h = surface->h;
 		BitmapPrepare(bitmap);
 	} else {
-		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0, TSRMLS_C, "Can't load image from string");
+		THROWF("Can't load image from string");
 		RETURN_FALSE;
 	}
 }
