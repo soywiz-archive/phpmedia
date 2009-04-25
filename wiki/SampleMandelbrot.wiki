@@ -1,0 +1,82 @@
+{{{
+<?php
+	Screen::title('PHP Mandelbrot explorer');
+	$screen = Screen::init(640, 480);
+	$key = 'Keyboard';
+	$out = new Bitmap($screen->w, $screen->h);
+	
+	// http://www.opengl.org/registry/doc/GLSLangSpec.Full.1.30.08.pdf
+	// http://en.wikipedia.org/wiki/Mandelbrot_set
+	$shader = new Shader("
+		varying vec3 position;
+		uniform float maxIterations;
+		uniform vec2 center;
+		uniform vec4 outerColor1;
+		uniform vec4 outerColor2;
+		uniform float zoom;
+		
+		void main()
+		{
+			vec2 z = vec2(position) * (1.0 / zoom) + center;
+			vec2 v0 = z;
+			
+			for (int iteration = 0; iteration < int(maxIterations); iteration++)
+			{
+				float xtemp = z.x * z.x - z.y * z.y + v0.x;
+				z.y = 2 * z.x * z.y + v0.y;
+				z.x = xtemp;
+
+				if (dot(z, z) >= 4.0) {
+					gl_FragColor = mix(outerColor1, outerColor2, float(iteration) / float(maxIterations));
+					return;
+				}
+			}
+			
+			gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+		}
+	", "
+		varying vec3 position;
+		void main()
+		{
+			position = vec3(gl_MultiTexCoord0 - 0.5) * 5.0;
+			position.x *= (640.0 / 480.0);
+			gl_Position = ftransform();
+		}
+	");
+
+	$z = 2.2;
+	$cx = -0.75;
+	$cy = 0;
+	$iters = 100;
+	while (!$key::pressed($key::ESC))
+	{
+		if ($key::down($key::W    )) $z *= 1.03;
+		if ($key::down($key::S    )) $z /= 1.03;
+		if ($key::down($key::A    )) $iters--;
+		if ($key::down($key::D    )) $iters++;
+		
+		Math::clamp($iters, 5, 150);
+
+		$move = 0.1 / $z;
+		if ($key::down($key::LEFT )) $cx -= $move;
+		if ($key::down($key::RIGHT)) $cx += $move;
+		if ($key::down($key::UP   )) $cy -= $move;
+		if ($key::down($key::DOWN )) $cy += $move;
+		
+		Math::clamp($cx, -2.0, 0.5);
+		Math::clamp($cy, -1.12, 1.12);
+		Math::clamp($z, 2.2, 128000);
+
+		printf("C(%f, %f), %f, %f\t\t\r", $cx, $cy, $z, $iters);
+		$screen->blit($out, 0, 0, 1, 0, 1, $shader, array(
+			'maxIterations' => $iters,
+			'center'        => array($cx, $cy),
+			'outerColor1'   => array(1, 1, 1, 0),
+			'outerColor2'   => array(1, 1, 1, 1),
+			'zoom'          => $z,
+		));
+
+		Screen::frame();
+	}
+?>
+}}}
