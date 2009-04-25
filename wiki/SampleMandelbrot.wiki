@@ -41,7 +41,7 @@
 		void main()
 		{
 			position = vec3(gl_MultiTexCoord0 - 0.5) * 5.0;
-			position.x *= (640.0 / 480.0);
+			position.x *= (float({$screen->w}) / float({$screen->h}));
 			gl_Position = ftransform();
 		}
 	");
