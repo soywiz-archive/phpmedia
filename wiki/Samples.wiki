@@ -1,3 +1,4 @@
 #summary List of samples
 
   * [SampleNave Nave sample]
+  * [SampleMandelbrot Mandelbrot Explorer Sample]
