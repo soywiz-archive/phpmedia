@@ -1,3 +1,5 @@
+[http://phpelegante.googlepages.com/mandelbrot.jpg]
+
 {{{
 <?php
 	Screen::title('PHP Mandelbrot explorer');
