@@ -12,30 +12,27 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 
-typedef struct {
-	SDL_Surface *surface;
-	GLint gltex;
-	int refcount;
-	int updated_source;
-} Image;
-
 typedef struct _BitmapStruct {
 	zend_object std;
 	struct _BitmapStruct *parent;
 	SDL_Surface *surface;
 	GLint gltex;
 
-	// new impl
-	Image image;
-
 	int cx, cy;
 	int x, y, w, h;
 } BitmapStruct;
 
-typedef struct _SoundStruct {
+typedef struct {
 	zend_object std;
 	Mix_Chunk *chunk;
 } SoundStruct;
+
+typedef struct {
+	zend_object std;
+	GLuint program;
+	GLuint shader_fragment;
+	GLuint shader_vertex;
+} ShaderStruct;
 
 #define PHP_METHODS_NAME(CLASS) CLASS##_Methods
 #define PHP_METHOD_NAME_ARGINFO(CLASS, METHOD) arginfo_##CLASS##METHOD
@@ -48,6 +45,7 @@ typedef struct _SoundStruct {
 #define ARG_INFO(name) ZEND_ARG_INFO(0, name)
 #define THIS_BITMAP GET_THIS_TYPE(BitmapStruct, bitmap);
 #define THIS_SOUND GET_THIS_TYPE(SoundStruct, sound);
+#define THIS_SHADER GET_THIS_TYPE(ShaderStruct, shader);
 #define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), ATT)
 #define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), ATT)
 #define PHP_ME_END {NULL, NULL, NULL}

@@ -268,21 +268,94 @@ PHP_METHOD(Bitmap, center)
 	}
 }
 
-// Bitmap::blit($bmp, $x = 0, $y = 0, $size = 1, $rotation = 0)
+// Bitmap::blit($bmp, $x = 0, $y = 0, $size = 1, $rotation = 0, $alpha = 1,Shader $shader = null)
 PHP_METHOD_ARGS(Bitmap, blit) ZEND_END_ARG_INFO()
 PHP_METHOD(Bitmap, blit)
 {
-	zval *object;
+	zval *object_bitmap = NULL, *object_shader = NULL, *shader_params = NULL;
 	double x = 0, y = 0;
 	double size = 1, rotation = 0, alpha = 1;
 	BitmapStruct *source;
+	ShaderStruct *shader;
+	BitmapStruct *sources[12];
 	double w, h, cx, cy;
-	double tx[2], ty[2];
+	double tx[12][2], ty[12][2];
+	int tex_count = 0, n;
 	THIS_BITMAP;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "O|ddddd", &object, Bitmap_ClassEntry, &x, &y, &size, &rotation, &alpha) == FAILURE) RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "O|dddddOa", &object_bitmap, Bitmap_ClassEntry, &x, &y, &size, &rotation, &alpha, &object_shader, Shader_ClassEntry, &shader_params) == FAILURE) RETURN_FALSE;
+	
+	if (glUseProgram) {
+		if (object_shader) {
+			shader = (ShaderStruct *)zend_object_store_get_object(object_shader, TSRMLS_C);
+			glUseProgram(shader->program);
 
-	source = (BitmapStruct *)zend_object_store_get_object(object, TSRMLS_C);
+			if (shader_params) {
+				HashPosition pos;
+				zval **element;
+				char *key; int key_len;
+				GLuint uni_id;
+
+				for (
+					zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(shader_params), &pos);
+					zend_hash_get_current_data_ex(Z_ARRVAL_P(shader_params), (void **) &element, &pos) == SUCCESS;
+					zend_hash_move_forward_ex(Z_ARRVAL_P(shader_params), &pos)
+				) {
+					zend_hash_get_current_key_ex(Z_ARRVAL_P(shader_params), &key, &key_len, NULL, 0, &pos);
+					uni_id = glGetUniformLocation(shader->program, key);
+
+					switch (Z_TYPE(**element)) {
+						case IS_DOUBLE: case IS_LONG:
+							convert_to_double(*element);
+							glUniform1f(uni_id, (float)Z_DVAL(**element));
+						break;
+						// A bitmap?
+						case IS_OBJECT: {
+							BitmapStruct *bitmap2;
+							
+							if (instanceof_function(Z_OBJCE(**element), Bitmap_ClassEntry, TSRMLS_C)) {
+								bitmap2 = (BitmapStruct *)zend_object_store_get_object(*element, TSRMLS_C);
+								glActiveTexture(GL_TEXTURE1 + tex_count++);
+								glBindTexture(GL_TEXTURE_2D, bitmap2->gltex);
+								glUniform1i(uni_id, tex_count);
+								sources[tex_count] = bitmap2;
+								//printf("%d: %d\n", uni_id, tex_count);
+								glEnable(GL_TEXTURE_2D);
+							} else {
+								zend_error(E_WARNING, "Only can process Bitmap objects");
+							}
+						} break;
+						case IS_ARRAY : {
+							zval **cvalue[16];
+							int n, count = zend_hash_num_elements(HASH_OF(*element));
+							for (n = 0; n < count; n++) {
+								zend_hash_index_find(HASH_OF(*element), n, (void **)&cvalue[n]);
+								convert_to_double(&**cvalue[n]);
+							}
+							switch (count) {
+								case 1: glUniform1f(uni_id, (float)Z_DVAL(**cvalue[0])); break;
+								case 2: glUniform2f(uni_id, (float)Z_DVAL(**cvalue[0]), (float)Z_DVAL(**cvalue[1])); break;
+								case 3: glUniform3f(uni_id, (float)Z_DVAL(**cvalue[0]), (float)Z_DVAL(**cvalue[1]), (float)Z_DVAL(**cvalue[2])); break;
+								case 4: glUniform4f(uni_id, (float)Z_DVAL(**cvalue[0]), (float)Z_DVAL(**cvalue[1]), (float)Z_DVAL(**cvalue[2]), (float)Z_DVAL(**cvalue[3])); break;
+							}
+						} break;
+					}
+					//glVertexAttrib1f(aid, v0);
+				}			
+				//printf("TEST %d\n", zend_hash_num_elements(HASH_OF(shader_params)));
+				//GLuint aid = glGetUniformLocation(id, std.string.toStringz(name));
+				//glVertexAttrib1f(aid, v0);
+			}
+			
+			//glVertexAttrib1d(glGetUniformLocation(shader->program, "mycol"), (GLfloat)0.3);
+		} else {
+			glUseProgram(0);
+		}
+	}
+	
+	tex_count++;
+	
+	sources[0] = source = (BitmapStruct *)zend_object_store_get_object(object_bitmap, TSRMLS_C);
 	//printf("%d\n", source->gltex);
 	BitmapPrepare(source);
 	
@@ -294,26 +367,43 @@ PHP_METHOD(Bitmap, blit)
 	//glScaled((double)source->surface->w, (double)source->surface->h, 1);
 	glScaled(size, size, 1);
 
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, source->gltex);
-	glTexParameterf(GL_TEXTURE_2D, 0x84FF, 16);
+	glTexParameterf(GL_TEXTURE_2D, GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, 16);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glColor4d(1, 1, 1, alpha);
+
+	for (n = 0; n < tex_count; n++) {
+		tx[n][0] = (double)(sources[n]->x + 0            ) / (double)sources[n]->surface->w;
+		tx[n][1] = (double)(sources[n]->x + sources[n]->w) / (double)sources[n]->surface->w;
+		ty[n][0] = (double)(sources[n]->y + 0            ) / (double)sources[n]->surface->h;
+		ty[n][1] = (double)(sources[n]->y + sources[n]->h) / (double)sources[n]->surface->h;
+
+		tx[n][0] *= (double)sources[0]->w / (double)sources[n]->w;
+		tx[n][1] *= (double)sources[0]->w / (double)sources[n]->w;
+		ty[n][0] *= (double)sources[0]->h / (double)sources[n]->h;
+		ty[n][1] *= (double)sources[0]->h / (double)sources[n]->h;
+		
+		//printf("(%f, %f)-(%f, %f)\n", (float)tx[n][0], (float)ty[n][0], (float)tx[n][1], (float)ty[n][1]);
+	}
+	
 	w = source->w;
 	h = source->h;
 	cx = source->cx;
 	cy = source->cy;
-	tx[0] = (double)(source->x + 0) / (double)source->surface->w;
-	tx[1] = (double)(source->x + w) / (double)source->surface->w;
-	ty[0] = (double)(source->y + 0) / (double)source->surface->h;
-	ty[1] = (double)(source->y + h) / (double)source->surface->h;
 	
+	#define QUAD_POINT(X, Y) { \
+		for (n = 0; n < tex_count; n++) glMultiTexCoord2d(GL_TEXTURE0 + n, tx[n][X], ty[n][Y]); \
+		glVertex2d((X * w) - cx, (Y * h) - cy); \
+	}
+		
 	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_POLYGON);
-		glTexCoord2d(tx[0], ty[0]); glVertex2d(0 - cx, 0 - cy);
-		glTexCoord2d(tx[1], ty[0]); glVertex2d(w - cx, 0 - cy);
-		glTexCoord2d(tx[1], ty[1]); glVertex2d(w - cx, h - cy);
-		glTexCoord2d(tx[0], ty[1]); glVertex2d(0 - cx, h - cy);
+		QUAD_POINT(0, 0);
+		QUAD_POINT(1, 0);
+		QUAD_POINT(1, 1);
+		QUAD_POINT(0, 1);
 	glEnd();
 	
 	//SDL_BlitSurface(source->surface, NULL, bitmap->surface, NULL);
