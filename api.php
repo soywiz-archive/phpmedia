@@ -203,23 +203,22 @@ final class Bitmap {
 	 * Blits the specified bitmap in the current one.
 	 *
 	 * @param Bitmap $src Source bitmap.
-	 * @param float $x Red.
-	 * @param float $y Green.
-	 * @param float $size Size.
-	 * @param float $rotation Rotation.
-	 * @param float $alpha Alpha.
-	 * @param Shader $shader PixelShader.
+	 * @param float  $x Red.
+	 * @param float  $y Green.
+	 * @param float  $size Size.
+	 * @param float  $rotation Rotation.
+	 * @param float  $alpha Alpha.
+	 * @param Shader $shader Shader.
+	 * @param array  $shader_params Parameters for the shader.
 	 */
-	public function blit(Bitmap $src, $x, $y, $size = 1.0, $rotation = 0, $alpha = 1.0, Shader $shader = NULL) { }
+	public function blit(Bitmap $src, $x, $y, $size = 1.0, $rotation = 0, $alpha = 1.0, Shader $shader = NULL, array $shader_params = NULL) { }
 }
 
 /**
  * Class to specify programs to execute for each pixel.
  */
 final class Shader {
-	public $params = array();
-
-	public function __construct($string) { }
+	public function __construct($shader_fragment = NULL, $shader_vertex = NULL) { }
 }
 
 /**

@@ -4,13 +4,17 @@ Mix_Music *music = NULL;
 SDL_Surface *screen;
 int keys_status[SDLK_LAST];
 int keys_pressed[SDLK_LAST];
+static char gl_error[0x800];
 
 static zend_object_handlers Bitmap_Handlers;
 static zend_object_handlers Sound_Handlers;
+static zend_object_handlers Shader_Handlers;
 static zend_class_entry    *Bitmap_ClassEntry;
 static zend_class_entry    *Sound_ClassEntry;
+static zend_class_entry    *Shader_ClassEntry;
 
 #include "php_media_utils.c"
+#include "php_media_shader.c"
 #include "php_media_bitmap.c"
 #include "php_media_screen.c"
 #include "php_media_input.c"
@@ -86,6 +90,12 @@ PM_METHODS(Math)
 	PHP_ME_END
 };
 
+PM_METHODS(Shader)
+{
+	PHP_ME_AI(Shader, __construct, ZEND_ACC_CTOR | ZEND_ACC_PUBLIC)
+	PHP_ME_END
+};
+
 const zend_function_entry module_functions[] =
 {
 	PHP_FE(dummy, NULL)
@@ -105,6 +115,15 @@ static void register_classes(TSRMLS_D)
 
 		PM_HANDLERS_INIT(Bitmap_Handlers);
 		PM_HANDLERS_ADD(clone_obj, Bitmap__ObjectClone);
+	}
+	
+	{ // Shader
+		PM_CLASS_INIT(Shader);
+		PM_CLASS_ADD(create_object, Shader__ObjectNew)
+		PM_CLASS_REGISTER();
+		Shader_ClassEntry = CurrentClassEntry;
+
+		PM_HANDLERS_INIT(Shader_Handlers);
 	}
 
 	{ // Screen

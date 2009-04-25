@@ -86,6 +86,8 @@ PHP_METHOD(Screen, init)
 	} else {
 		RETURN_FALSE;
 	}
+
+	glInitExsts();
 }
 
 // Screen::frame()

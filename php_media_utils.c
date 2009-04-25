@@ -31,6 +31,58 @@ PFNGLGENFRAMEBUFFERSEXTPROC        glGenFramebuffersEXT        = NULL;
 PFNGLFRAMEBUFFERTEXTURE2DEXTPROC   glFramebufferTexture2DEXT   = NULL;
 PFNGLDELETEFRAMEBUFFERSEXTPROC     glDeleteFramebuffersEXT     = NULL;
 PFNGLBINDFRAMEBUFFEREXTPROC        glBindFramebufferEXT        = NULL;
+// Shaders
+PFNGLCREATEPROGRAMPROC             glCreateProgram             = NULL;
+PFNGLLINKPROGRAMPROC               glLinkProgram               = NULL;
+PFNGLUSEPROGRAMPROC                glUseProgram                = NULL;
+PFNGLDELETEPROGRAMPROC             glDeleteProgram             = NULL;
+
+PFNGLCREATESHADERPROC              glCreateShader              = NULL;
+PFNGLSHADERSOURCEPROC              glShaderSource              = NULL;
+PFNGLCOMPILESHADERPROC             glCompileShader             = NULL;
+PFNGLDELETESHADERPROC              glDeleteShader              = NULL;
+PFNGLGETSHADERIVPROC               glGetShaderiv               = NULL;
+PFNGLATTACHSHADERPROC              glAttachShader              = NULL;
+PFNGLGETSHADERINFOLOGPROC          glGetShaderInfoLog          = NULL;
+
+PFNGLGETUNIFORMLOCATIONPROC        glGetUniformLocation        = NULL;
+PFNGLUNIFORM1FPROC                 glUniform1f                 = NULL;
+PFNGLUNIFORM2FPROC                 glUniform2f                 = NULL;
+PFNGLUNIFORM3FPROC                 glUniform3f                 = NULL;
+PFNGLUNIFORM4FPROC                 glUniform4f                 = NULL;
+
+PFNGLUNIFORM1IPROC                 glUniform1i                 = NULL;
+
+PFNGLACTIVETEXTUREPROC             glActiveTexture             = NULL;
+PFNGLMULTITEXCOORD2DPROC           glMultiTexCoord2d           = NULL;
+
+#define GL_LOAD_FUNC(name) name = SDL_GL_GetProcAddress(#name)
+
+void glInitExsts() {
+	GL_LOAD_FUNC(glCreateProgram);
+	GL_LOAD_FUNC(glLinkProgram);
+	GL_LOAD_FUNC(glUseProgram);
+	GL_LOAD_FUNC(glDeleteProgram);
+
+	GL_LOAD_FUNC(glCreateShader);
+	GL_LOAD_FUNC(glShaderSource);
+	GL_LOAD_FUNC(glDeleteShader);
+	GL_LOAD_FUNC(glCompileShader);
+	GL_LOAD_FUNC(glGetShaderiv);
+	GL_LOAD_FUNC(glAttachShader);
+	GL_LOAD_FUNC(glGetShaderInfoLog);
+
+	GL_LOAD_FUNC(glGetUniformLocation);
+	GL_LOAD_FUNC(glUniform1f);
+	GL_LOAD_FUNC(glUniform2f);
+	GL_LOAD_FUNC(glUniform3f);
+	GL_LOAD_FUNC(glUniform4f);
+	GL_LOAD_FUNC(glUniform1i);
+	
+	GL_LOAD_FUNC(glActiveTexture);
+	GL_LOAD_FUNC(glMultiTexCoord2d);
+}
+
 
 // Eliminamos el FrameBufferObject
 void RemoveFrameBufferObject(void) {
@@ -51,11 +103,11 @@ void InitializeFrameBufferObject(void) {
 	}
 
 	// Obtenemos la dirección de los procedimientos
-	glGenFramebuffersEXT        = (PFNGLGENFRAMEBUFFERSEXTPROC)       SDL_GL_GetProcAddress("glGenFramebuffersEXT");
-	glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)SDL_GL_GetProcAddress("glCheckFramebufferStatusEXT");
-	glFramebufferTexture2DEXT   = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)  SDL_GL_GetProcAddress("glFramebufferTexture2DEXT");
-	glDeleteFramebuffersEXT     = (PFNGLDELETEFRAMEBUFFERSEXTPROC)    SDL_GL_GetProcAddress("glDeleteFramebuffersEXT");
-	glBindFramebufferEXT        = (PFNGLBINDFRAMEBUFFEREXTPROC)       SDL_GL_GetProcAddress("glBindFramebufferEXT");
+	GL_LOAD_FUNC(glGenFramebuffersEXT);
+	GL_LOAD_FUNC(glCheckFramebufferStatusEXT);
+	GL_LOAD_FUNC(glFramebufferTexture2DEXT);
+	GL_LOAD_FUNC(glDeleteFramebuffersEXT);
+	GL_LOAD_FUNC(glBindFramebufferEXT);
 
 	// Comprobamos que se han obtenido correctamente los procedimientos
 	if(!glCheckFramebufferStatusEXT || !glGenFramebuffersEXT || !glFramebufferTexture2DEXT || !glBindFramebufferEXT || !glDeleteFramebuffersEXT) {
