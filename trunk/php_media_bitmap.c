@@ -350,6 +350,11 @@ PHP_METHOD(Bitmap, blit)
 			//glVertexAttrib1d(glGetUniformLocation(shader->program, "mycol"), (GLfloat)0.3);
 		} else {
 			glUseProgram(0);
+			for (n = 0; n < 8; n++) {
+				glActiveTexture(GL_TEXTURE1 + n);
+				glBindTexture(GL_TEXTURE_2D, 0);
+				glDisable(GL_TEXTURE_2D);
+			}
 		}
 	}
 	
