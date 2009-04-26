@@ -326,6 +326,9 @@ PHP_METHOD(Bitmap, blit)
 								values_i[n] = (int   )Z_DVAL(**cvalue);								
 							}
 						}break;
+						case IS_OBJECT:
+							values_count = 1;
+						break;
 						default:
 							convert_to_double(*element);
 							values_d[0] = (double)Z_DVAL(**element);
