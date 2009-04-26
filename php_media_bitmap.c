@@ -108,7 +108,8 @@ PHP_METHOD(Bitmap, slice)
 	clamp(&w, 0, bitmap->w - x);
 	clamp(&h, 0, bitmap->h - y);
 
-	ObjectInit(ClassEntry_Bitmap, return_value, TSRMLS_C);
+	//ObjectInit(ClassEntry_Bitmap, return_value, TSRMLS_C);
+	ObjectInit(EG(called_scope), return_value, TSRMLS_C);
 	new_bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
 	new_bitmap->parent = bitmap;
 	new_bitmap->surface = bitmap->surface;
@@ -163,7 +164,8 @@ int Bitmap_fromRW(zval **return_value, SDL_RWops *rw, TSRMLS_D)
 
 	if ((surface = IMG_Load_RW(rw, 1)) == NULL) return 0;
 	
-	ObjectInit(ClassEntry_Bitmap, *return_value, TSRMLS_C);
+	//ObjectInit(ClassEntry_Bitmap, *return_value, TSRMLS_C);
+	ObjectInit(EG(called_scope), *return_value, TSRMLS_C);
 	bitmap = zend_object_store_get_object(*return_value, TSRMLS_C);
 
 	bitmap->surface = surface;

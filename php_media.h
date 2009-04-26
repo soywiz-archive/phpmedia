@@ -37,6 +37,7 @@ typedef struct {
 
 typedef struct {
 	zend_object std;
+	TTF_Font *font;
 } FontStruct;
 
 #define PHP_METHODS_NAME(CLASS) CLASS##_Methods
