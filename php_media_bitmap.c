@@ -282,6 +282,18 @@ PHP_METHOD(Bitmap, blit)
 				zval **element;
 				char *key; int key_len;
 				GLuint uni_id;
+				GLenum uni_type;
+				int dummy, n;
+				double values_d[16];
+				float  values_f[16];
+				int    values_i[16];
+				int    values_count = 0;
+				
+				for (n = 0; n < 16; n++) {
+					values_d[n] = 0.0;
+					values_f[n] = 0.0;
+					values_i[n] = 0;
+				}
 
 				for (
 					zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(shader_params), &pos);
@@ -290,21 +302,60 @@ PHP_METHOD(Bitmap, blit)
 				) {
 					zend_hash_get_current_key_ex(Z_ARRVAL_P(shader_params), &key, &key_len, NULL, 0, &pos);
 					uni_id = glGetUniformLocation(shader->program, key);
+					
+					if (uni_id == -1) {
+						zend_error(E_WARNING, "Can't find uniform with name '%s'", key);
+						continue;
+					}
 
+					glGetActiveUniform(shader->program, uni_id, 0, NULL, &dummy, &uni_type, NULL);
+					//printf("%s: %d\n", key, uni_type);
+					
 					switch (Z_TYPE(**element)) {
-						case IS_DOUBLE: case IS_LONG:
+						case IS_ARRAY: {
+							zval **cvalue;
+							int n;
+							values_count = zend_hash_num_elements(HASH_OF(*element));
+							for (n = 0; n < values_count; n++) {
+								zend_hash_index_find(HASH_OF(*element), n, (void **)&cvalue);
+								convert_to_double(&**cvalue);
+								values_d[n] = (double)Z_DVAL(**cvalue);
+								values_f[n] = (float )Z_DVAL(**cvalue);
+								values_i[n] = (int   )Z_DVAL(**cvalue);								
+							}
+						}break;
+						default:
 							convert_to_double(*element);
-							glUniform1f(uni_id, (float)Z_DVAL(**element));
+							values_d[0] = (double)Z_DVAL(**element);
+							values_f[0] = (float )Z_DVAL(**element);
+							values_i[0] = (int   )Z_DVAL(**element);
+							values_count = 1;
 						break;
-						// A bitmap?
-						case IS_OBJECT: {
+					}
+					
+					#define uni_check_length(EXPECTED) if (values_count != (EXPECTED)) { zend_error(E_WARNING, "Uniform '%s' expects %d values, obtained %d", key, (int)EXPECTED, (int)values_count); }
+					
+					#define GL_INT_VEC1 GL_INT
+					#define GL_BOOL_VEC1 GL_BOOL
+					#define GL_FLOAT_VEC1 GL_FLOAT
+					#define UNIFORM_F(N) { case GL_FLOAT_VEC##N: glUniform##N##fv(uni_id, 1, values_f); uni_check_length(N); break; }
+					#define UNIFORM_I(N) { case GL_INT_VEC##N: case GL_BOOL_VEC##N: glUniform##N##iv(uni_id, 1, values_i); uni_check_length(N); break; }
+					
+					switch (uni_type) {
+						UNIFORM_F(1); UNIFORM_F(2); UNIFORM_F(3); UNIFORM_F(4); // FLOAT
+						UNIFORM_I(1); UNIFORM_I(2); UNIFORM_I(3); UNIFORM_I(4); // INT/BOOL
+						// MATRIX
+						case GL_FLOAT_MAT2: case GL_FLOAT_MAT3: case GL_FLOAT_MAT4: case GL_FLOAT_MAT2x3: case GL_FLOAT_MAT2x4: case GL_FLOAT_MAT3x2: case GL_FLOAT_MAT3x4: case GL_FLOAT_MAT4x2: case GL_FLOAT_MAT4x3:
+							zend_error(E_WARNING, "Matrix uniforms not implemented");
+						break;
+						case GL_SAMPLER_1D: case GL_SAMPLER_2D: case GL_SAMPLER_3D: case GL_SAMPLER_CUBE: case GL_SAMPLER_1D_SHADOW: case GL_SAMPLER_2D_SHADOW: {
 							BitmapStruct *bitmap2;
 							
-							if (instanceof_function(Z_OBJCE(**element), ClassEntry_Bitmap, TSRMLS_C)) {
+							if ((Z_TYPE(**element) == IS_OBJECT) && instanceof_function(Z_OBJCE(**element), ClassEntry_Bitmap, TSRMLS_C)) {
 								bitmap2 = (BitmapStruct *)zend_object_store_get_object(*element, TSRMLS_C);
 								glActiveTexture(GL_TEXTURE0 + tex_count);
 								glBindTexture(GL_TEXTURE_2D, bitmap2->gltex);
-								glUniform1i(uni_id, tex_count);
+								glUniform1iv(uni_id, 1, &tex_count);
 								sources[tex_count] = bitmap2;
 								//printf("%d: %d\n", uni_id, tex_count);
 								glEnable(GL_TEXTURE_2D);
@@ -316,28 +367,14 @@ PHP_METHOD(Bitmap, blit)
 									glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 									glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 								}
-								
 
 								tex_count++;
 							} else {
 								zend_error(E_WARNING, "Only can process Bitmap objects");
-							}
-						} break;
-						case IS_ARRAY : {
-							zval **cvalue[16];
-							int n, count = zend_hash_num_elements(HASH_OF(*element));
-							for (n = 0; n < count; n++) {
-								zend_hash_index_find(HASH_OF(*element), n, (void **)&cvalue[n]);
-								convert_to_double(&**cvalue[n]);
-							}
-							switch (count) {
-								case 1: glUniform1f(uni_id, (float)Z_DVAL(**cvalue[0])); break;
-								case 2: glUniform2f(uni_id, (float)Z_DVAL(**cvalue[0]), (float)Z_DVAL(**cvalue[1])); break;
-								case 3: glUniform3f(uni_id, (float)Z_DVAL(**cvalue[0]), (float)Z_DVAL(**cvalue[1]), (float)Z_DVAL(**cvalue[2])); break;
-								case 4: glUniform4f(uni_id, (float)Z_DVAL(**cvalue[0]), (float)Z_DVAL(**cvalue[1]), (float)Z_DVAL(**cvalue[2]), (float)Z_DVAL(**cvalue[3])); break;
-							}
+							}							
 						} break;
 					}
+
 					//glVertexAttrib1f(aid, v0);
 				}			
 				//printf("TEST %d\n", zend_hash_num_elements(HASH_OF(shader_params)));
