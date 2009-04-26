@@ -20,11 +20,11 @@
 		void main()
 		{
 			vec2 z = vec2(position) * (1.0 / zoom) + center;
-			vec2 v0 = z;
+			vec2 z0 = z;
 			
 			for (int iteration = 0; iteration < int(maxIterations); iteration++)
 			{
-				z = vec2((z.x * z.x - z.y * z.y + v0.x), (2 * z.x * z.y + v0.y));
+				z = vec2((z.x * z.x - z.y * z.y + z0.x), (2 * z.x * z.y + z0.y));
 
 				if (dot(z, z) >= 4.0) {
 					gl_FragColor = mix(outerColor1, outerColor2, float(iteration) / float(maxIterations));
