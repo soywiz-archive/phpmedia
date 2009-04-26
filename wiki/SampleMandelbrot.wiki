@@ -24,9 +24,7 @@
 			
 			for (int iteration = 0; iteration < int(maxIterations); iteration++)
 			{
-				float xtemp = z.x * z.x - z.y * z.y + v0.x;
-				z.y = 2 * z.x * z.y + v0.y;
-				z.x = xtemp;
+				z = vec2((z.x * z.x - z.y * z.y + v0.x), (2 * z.x * z.y + v0.y));
 
 				if (dot(z, z) >= 4.0) {
 					gl_FragColor = mix(outerColor1, outerColor2, float(iteration) / float(maxIterations));
