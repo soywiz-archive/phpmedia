@@ -30,7 +30,7 @@ static zend_object_value Bitmap__ObjectNew_ex(zend_class_entry *class_type, Bitm
 		TSRMLS_C
 	);
 
-	retval.handlers = &Bitmap_Handlers;
+	retval.handlers = &Handlers_Bitmap;
 	
 	return retval;
 }
@@ -141,7 +141,7 @@ PHP_METHOD(Bitmap, slice)
 	clamp(&w, 0, bitmap->w - x);
 	clamp(&h, 0, bitmap->h - y);
 
-	ObjectInit(Bitmap_ClassEntry, return_value, TSRMLS_C);
+	ObjectInit(ClassEntry_Bitmap, return_value, TSRMLS_C);
 	new_bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
 	new_bitmap->parent = bitmap;
 	new_bitmap->surface = bitmap->surface;
@@ -170,7 +170,7 @@ PHP_METHOD(Bitmap, split)
 	
 	for (y = 0; y < bitmap->h; y += h) {
 		for (x = 0; x < bitmap->w; x += w) {
-			object = ObjectInit(Bitmap_ClassEntry, NULL, TSRMLS_C);
+			object = ObjectInit(ClassEntry_Bitmap, NULL, TSRMLS_C);
 			new_bitmap = zend_object_store_get_object(object, TSRMLS_C);
 			new_bitmap->parent = bitmap;
 			new_bitmap->surface = bitmap->surface;
@@ -197,7 +197,7 @@ PHP_METHOD(Bitmap, fromFile)
 
 	if (surface = IMG_Load(name)) {
 		BitmapStruct *bitmap;
-		ObjectInit(Bitmap_ClassEntry, return_value, TSRMLS_C);
+		ObjectInit(ClassEntry_Bitmap, return_value, TSRMLS_C);
 		bitmap = zend_object_store_get_object(return_value, TSRMLS_C);bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
 		bitmap->surface = surface;
 		bitmap->x = bitmap->y = bitmap->cx = bitmap->cy = 0;
@@ -219,7 +219,7 @@ PHP_METHOD(Bitmap, fromString)
 
 	if (surface = IMG_Load_RW(SDL_RWFromConstMem(data, data_len), 1)) {
 		BitmapStruct *bitmap;
-		ObjectInit(Bitmap_ClassEntry, return_value, TSRMLS_C);
+		ObjectInit(ClassEntry_Bitmap, return_value, TSRMLS_C);
 		bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
 		bitmap->surface = surface;
 		bitmap->x = bitmap->y = bitmap->cx = bitmap->cy = 0;
@@ -268,14 +268,14 @@ PHP_METHOD(Bitmap, center)
 	}
 }
 
-// Bitmap::blit($bmp, $x = 0, $y = 0, $size = 1, $rotation = 0, $alpha = 1,Shader $shader = null)
+// Bitmap::blit($dest, $x = 0, $y = 0, $size = 1, $rotation = 0, $alpha = 1,Shader $shader = null)
 PHP_METHOD_ARGS(Bitmap, blit) ZEND_END_ARG_INFO()
 PHP_METHOD(Bitmap, blit)
 {
 	zval *object_bitmap = NULL, *object_shader = NULL, *shader_params = NULL;
 	double x = 0, y = 0;
 	double size = 1, rotation = 0, alpha = 1;
-	BitmapStruct *source;
+	BitmapStruct *source, *dest;
 	ShaderStruct *shader;
 	BitmapStruct *sources[12];
 	double w, h, cx, cy;
@@ -283,7 +283,20 @@ PHP_METHOD(Bitmap, blit)
 	int tex_count = 0, n;
 	THIS_BITMAP;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "O|dddddOa", &object_bitmap, Bitmap_ClassEntry, &x, &y, &size, &rotation, &alpha, &object_shader, Shader_ClassEntry, &shader_params) == FAILURE) RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "O|dddddOa", &object_bitmap, ClassEntry_Bitmap, &x, &y, &size, &rotation, &alpha, &object_shader, ClassEntry_Shader, &shader_params) == FAILURE) RETURN_FALSE;
+	
+	source = bitmap;
+	dest = (BitmapStruct *)zend_object_store_get_object(object_bitmap, TSRMLS_C);
+	
+	BitmapPrepare(source);
+	BitmapPrepareDraw(dest);
+	
+	sources[tex_count++] = source;
+
+	if (source == dest) {
+		THROWF("Can't draw a bitmap on itself.");
+		RETURN_FALSE;
+	}
 	
 	if (glUseProgram) {
 		if (object_shader) {
@@ -313,14 +326,16 @@ PHP_METHOD(Bitmap, blit)
 						case IS_OBJECT: {
 							BitmapStruct *bitmap2;
 							
-							if (instanceof_function(Z_OBJCE(**element), Bitmap_ClassEntry, TSRMLS_C)) {
+							if (instanceof_function(Z_OBJCE(**element), ClassEntry_Bitmap, TSRMLS_C)) {
 								bitmap2 = (BitmapStruct *)zend_object_store_get_object(*element, TSRMLS_C);
-								glActiveTexture(GL_TEXTURE1 + tex_count++);
+								glActiveTexture(GL_TEXTURE0 + tex_count);
 								glBindTexture(GL_TEXTURE_2D, bitmap2->gltex);
 								glUniform1i(uni_id, tex_count);
 								sources[tex_count] = bitmap2;
 								//printf("%d: %d\n", uni_id, tex_count);
 								glEnable(GL_TEXTURE_2D);
+
+								tex_count++;
 							} else {
 								zend_error(E_WARNING, "Only can process Bitmap objects");
 							}
@@ -358,18 +373,9 @@ PHP_METHOD(Bitmap, blit)
 		}
 	}
 	
-	tex_count++;
-	
-	sources[0] = source = (BitmapStruct *)zend_object_store_get_object(object_bitmap, TSRMLS_C);
-	//printf("%d\n", source->gltex);
-	BitmapPrepare(source);
-	
-	BitmapPrepareDraw(bitmap);
-
 	glLoadIdentity();
 	glTranslated(x, y, 0);
 	glRotated(rotation, 0, 0, 1);
-	//glScaled((double)source->surface->w, (double)source->surface->h, 1);
 	glScaled(size, size, 1);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -411,7 +417,5 @@ PHP_METHOD(Bitmap, blit)
 		QUAD_POINT(0, 1);
 	glEnd();
 	
-	//SDL_BlitSurface(source->surface, NULL, bitmap->surface, NULL);
-
 	RETURN_TRUE;
 }

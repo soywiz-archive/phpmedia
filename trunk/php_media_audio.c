@@ -28,7 +28,7 @@ static zend_object_value Sound__ObjectNew_ex(zend_class_entry *class_type, Sound
 		TSRMLS_C
 	);
 
-	retval.handlers = &Sound_Handlers;
+	retval.handlers = &Handlers_Sound;
 	
 	return retval;
 }
@@ -60,7 +60,7 @@ PHP_METHOD(Sound, fromFile)
 
 	if (chunk = Mix_LoadWAV(name)) {
 		SoundStruct *sound;
-		ObjectInit(Sound_ClassEntry, return_value, TSRMLS_C);
+		ObjectInit(ClassEntry_Sound, return_value, TSRMLS_C);
 		sound = zend_object_store_get_object(return_value, TSRMLS_C);
 		sound->chunk = chunk;
 	} else {

@@ -75,7 +75,7 @@ PHP_METHOD(Screen, init)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	if (screen) {
-		ObjectInit(Bitmap_ClassEntry, return_value, TSRMLS_C);
+		ObjectInit(ClassEntry_Bitmap, return_value, TSRMLS_C);
 		{
 			BitmapStruct *bmp = zend_object_store_get_object(return_value, TSRMLS_C);
 			bmp->surface = screen;

@@ -9,7 +9,7 @@ Class to handle, modify and draw images.
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5slice slice] ($x, $y, $w, $h) : <font color="#a88">[API_6Bitmap Bitmap]</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5split split] ($w, $h) : <font color="#a88">Array</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5clear clear] ($r<font color="#999"> = 0</font>, $g<font color="#999"> = 0</font>, $b<font color="#999"> = 0</font>, $a<font color="#999"> = 0</font>) : <font color="#a88">void</font>
-  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap4blit blit] ([API_6Bitmap Bitmap] $src, $x, $y, $size<font color="#999"> = 1</font>, $rotation<font color="#999"> = 0</font>, $alpha<font color="#999"> = 1</font>, [API_6Shader Shader] $shader<font color="#999"> = NULL</font>, $shader_params<font color="#999"> = NULL</font>) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap4blit blit] ([API_6Bitmap Bitmap] $dest, $x, $y, $size<font color="#999"> = 1</font>, $rotation<font color="#999"> = 0</font>, $alpha<font color="#999"> = 1</font>, [API_6Shader Shader] $shader<font color="#999"> = NULL</font>, $shader_params<font color="#999"> = NULL</font>) : <font color="#a88">void</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Bitmap1x $x]
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Bitmap1y $y]
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Bitmap1w $w]
