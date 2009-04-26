@@ -85,7 +85,7 @@
 		printf("Center(%f, %f), Zoom(%.2f), Iterations(%d)\t\r", $center_x, $center_y, $zoom, $maxIterations);
 
 		// Blits the mandelbrot on the screen.
-		$screen->blit($out, 0, 0, 1, 0, 1, $shader_mandelbrot, array(
+		$out->blit($screen, 0, 0, 1, 0, 1, $shader_mandelbrot, array(
 			'maxIterations' => $maxIterations,
 			'center'        => array($center_x, $center_y),
 			'outerColor1'   => array(1, 1, 1, 0),
