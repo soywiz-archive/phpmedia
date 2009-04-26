@@ -220,6 +220,8 @@ final class Bitmap {
  */
 final class Shader {
 	public function __construct($shader_fragment = NULL, $shader_vertex = NULL) { }
+	public function begin($shader_params) { }
+	public function end() { }
 }
 
 /**
