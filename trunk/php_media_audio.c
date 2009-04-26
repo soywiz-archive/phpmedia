@@ -20,7 +20,9 @@ int Sound_fromRW(zval **return_value, SDL_RWops *rw, TSRMLS_D)
 
 	if ((chunk = Mix_LoadWAV_RW(rw, 1)) == NULL) return 0;
 		
-	ObjectInit(ClassEntry_Sound, *return_value, TSRMLS_C);
+	//ObjectInit(ClassEntry_Sound, *return_value, TSRMLS_C);
+	ObjectInit(EG(called_scope), *return_value, TSRMLS_C);
+
 	sound = zend_object_store_get_object(*return_value, TSRMLS_C);
 	sound->chunk = chunk;
 

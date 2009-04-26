@@ -26,10 +26,11 @@ static zend_class_entry    *ClassEntry_Font;
 
 PM_METHODS(Font)
 {
-	PHP_ME_AI(Font, fromFile, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
-	PHP_ME_AI(Font, width   , ZEND_ACC_PUBLIC)
-	PHP_ME_AI(Font, height  , ZEND_ACC_PUBLIC)
-	PHP_ME_AI(Font, blit    , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Font, fromFile  , ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Font, fromString, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Font, width     , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Font, height    , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Font, blit      , ZEND_ACC_PUBLIC)
 	PHP_ME_END
 };
 
@@ -223,7 +224,7 @@ static void register_classes(TSRMLS_D)
 		PM_CLASS_ADD(create_object, Font__ObjectNew)
 		PM_CLASS_REGISTER();
 		ClassEntry_Font = CurrentClassEntry;
-		PM_HANDLERS_INIT(Handlers_Sound);
+		PM_HANDLERS_INIT(Handlers_Font);
 		PM_HANDLERS_ADD(clone_obj, Font__ObjectClone);
 	}
 
