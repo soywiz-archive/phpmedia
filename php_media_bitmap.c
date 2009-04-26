@@ -60,6 +60,7 @@ static zend_object_value Bitmap__ObjectClone(zval *this_ptr, TSRMLS_D)
 	CLONE_COPY_FIELD(y);
 	CLONE_COPY_FIELD(w);
 	CLONE_COPY_FIELD(h);
+	CLONE_COPY_FIELD(smooth);
 	new_obj->surface->refcount++;
 	
 	return new_ov;
@@ -83,6 +84,7 @@ PHP_METHOD(Bitmap, __construct)
 		bitmap->h = h;
 		bitmap->cx = 0;
 		bitmap->cy = 0;
+		bitmap->smooth = 1;
 		BitmapPrepare(bitmap);
 	}
 }
@@ -99,6 +101,9 @@ PHP_METHOD(Bitmap, __set)
 		case 2:
 			if (strcmp(key, "cx") == 0) RETURN_LONG((bitmap) ? bitmap->cx = v : 0);
 			if (strcmp(key, "cy") == 0) RETURN_LONG((bitmap) ? bitmap->cy = v : 0);
+		break;
+		case 6:
+			if (strcmp(key, "smooth") == 0) RETURN_LONG((bitmap) ? bitmap->smooth = v : 0);
 		break;
 	}
 
@@ -121,6 +126,9 @@ PHP_METHOD(Bitmap, __get)
 		case 2:
 			if (strcmp(key, "cx") == 0) RETURN_LONG((bitmap) ? bitmap->cx : 0);
 			if (strcmp(key, "cy") == 0) RETURN_LONG((bitmap) ? bitmap->cy : 0);
+		break;
+		case 6:
+			if (strcmp(key, "smooth") == 0) RETURN_LONG((bitmap) ? bitmap->smooth : 0);
 		break;
 	}
 
@@ -152,6 +160,7 @@ PHP_METHOD(Bitmap, slice)
 	new_bitmap->cy = 0;
 	new_bitmap->w = w;
 	new_bitmap->h = h;
+	new_bitmap->smooth = bitmap->smooth;
 	new_bitmap->surface->refcount++;
 }
 
@@ -181,55 +190,56 @@ PHP_METHOD(Bitmap, split)
 			new_bitmap->cy = 0;
 			new_bitmap->w = w;
 			new_bitmap->h = h;
+			new_bitmap->smooth = bitmap->smooth;
 			new_bitmap->surface->refcount++;
 			add_next_index_zval(return_value, object);
 		}
 	}
 }
 
+int Bitmap_fromRW(zval **return_value, SDL_RWops *rw, TSRMLS_D)
+{
+	SDL_Surface *surface;
+	BitmapStruct *bitmap;
+
+	if ((surface = IMG_Load_RW(rw, 1)) == NULL) return 0;
+	
+	ObjectInit(ClassEntry_Bitmap, *return_value, TSRMLS_C);
+	bitmap = zend_object_store_get_object(*return_value, TSRMLS_C);
+
+	bitmap->surface = surface;
+	bitmap->x = bitmap->y = bitmap->cx = bitmap->cy = 0;
+	bitmap->w = surface->w;
+	bitmap->h = surface->h;
+	bitmap->smooth = 1;
+
+	BitmapPrepare(bitmap);
+
+	return 1;
+}
+
 // Bitmap::fromFile($name)
 PHP_METHOD_ARGS(Bitmap, fromFile) ARG_INFO(name) ZEND_END_ARG_INFO()
 PHP_METHOD(Bitmap, fromFile)
 {
-	char *name; int name_len;
-	SDL_Surface *surface;
+	char *name;
+	int name_len;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &name, &name_len) == FAILURE) RETURN_FALSE;
 
-	if (surface = IMG_Load(name)) {
-		BitmapStruct *bitmap;
-		ObjectInit(ClassEntry_Bitmap, return_value, TSRMLS_C);
-		bitmap = zend_object_store_get_object(return_value, TSRMLS_C);bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
-		bitmap->surface = surface;
-		bitmap->x = bitmap->y = bitmap->cx = bitmap->cy = 0;
-		bitmap->w = surface->w;
-		bitmap->h = surface->h;
-		BitmapPrepare(bitmap);
-	} else {
-		THROWF("Can't load image '%s'", name);
-	}
+	if (!Bitmap_fromRW(&return_value, SDL_RWFromFile(name, "r"), TSRMLS_C)) THROWF("Can't load image from file: '%s'", name);
 }
 
 // Bitmap::fromString($data)
 PHP_METHOD_ARGS(Bitmap, fromString) ARG_INFO(name) ZEND_END_ARG_INFO()
 PHP_METHOD(Bitmap, fromString)
 {
-	char *data; int data_len;
-	SDL_Surface *surface;
+	char *data;
+	int data_len;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &data, &data_len) == FAILURE) RETURN_FALSE;
 
-	if (surface = IMG_Load_RW(SDL_RWFromConstMem(data, data_len), 1)) {
-		BitmapStruct *bitmap;
-		ObjectInit(ClassEntry_Bitmap, return_value, TSRMLS_C);
-		bitmap = zend_object_store_get_object(return_value, TSRMLS_C);
-		bitmap->surface = surface;
-		bitmap->x = bitmap->y = bitmap->cx = bitmap->cy = 0;
-		bitmap->w = surface->w;
-		bitmap->h = surface->h;
-		BitmapPrepare(bitmap);
-	} else {
-		THROWF("Can't load image from string");
-		RETURN_FALSE;
-	}
+	if (!Bitmap_fromRW(&return_value, SDL_RWFromConstMem(data, data_len), TSRMLS_C)) THROWF("Can't load image from string");
 }
 
 // Bitmap::clear($r = 0, $g = 0, $b = 0, $a = 0)
@@ -298,6 +308,11 @@ PHP_METHOD(Bitmap, blit)
 		RETURN_FALSE;
 	}
 	
+	if (source->surface == screen) {
+		THROWF("Can't blit the screen on a bitmap.");
+		RETURN_FALSE;		
+	}
+	
 	if (glUseProgram) {
 		if (object_shader) {
 			shader = (ShaderStruct *)zend_object_store_get_object(object_shader, TSRMLS_C);
@@ -334,6 +349,15 @@ PHP_METHOD(Bitmap, blit)
 								sources[tex_count] = bitmap2;
 								//printf("%d: %d\n", uni_id, tex_count);
 								glEnable(GL_TEXTURE_2D);
+								
+								if (bitmap2->smooth) {
+									glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+									glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+								} else {
+									glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+									glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+								}
+								
 
 								tex_count++;
 							} else {
@@ -384,6 +408,15 @@ PHP_METHOD(Bitmap, blit)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glColor4d(1, 1, 1, alpha);
+	
+	if (source->smooth) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	} else {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	}
+	
 
 	for (n = 0; n < tex_count; n++) {
 		tx[n][0] = (double)(sources[n]->x + 0            ) / (double)sources[n]->surface->w;

@@ -20,6 +20,7 @@ typedef struct _BitmapStruct {
 
 	int cx, cy;
 	int x, y, w, h;
+	int smooth;
 } BitmapStruct;
 
 typedef struct {

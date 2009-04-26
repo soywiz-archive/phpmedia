@@ -69,6 +69,7 @@ final class Channel {
  */
 final class Sound {
 	static public function fromFile($file) { }
+	static public function fromString($data) { }
 	public function slice($start = 0, $length = NULL) { }
 	public function play() { }
 }
