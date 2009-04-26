@@ -82,6 +82,7 @@ PHP_METHOD(Screen, init)
 			bmp->w = screen->w;
 			bmp->h = screen->h;
 			bmp->cx = bmp->cy = bmp->x = bmp->y = 0;
+			bmp->smooth = 1;
 		}
 	} else {
 		RETURN_FALSE;

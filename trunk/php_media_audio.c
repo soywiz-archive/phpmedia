@@ -50,22 +50,42 @@ static zend_object_value Sound__ObjectClone(zval *this_ptr, TSRMLS_D)
 	return new_ov;
 }
 
+int Sound_fromRW(zval **return_value, SDL_RWops *rw, TSRMLS_D)
+{
+	Mix_Chunk *chunk;
+	SoundStruct *sound;
+
+	if ((chunk = Mix_LoadWAV_RW(rw, 1)) == NULL) return 0;
+		
+	ObjectInit(ClassEntry_Sound, *return_value, TSRMLS_C);
+	sound = zend_object_store_get_object(*return_value, TSRMLS_C);
+	sound->chunk = chunk;
+
+	return 1;
+}
+
 // Sound::fromFile($file)
 PHP_METHOD_ARGS(Sound, fromFile) ARG_INFO(file) ZEND_END_ARG_INFO()
 PHP_METHOD(Sound, fromFile)
 {
-	char *name = NULL; int name_len = 0;
-	Mix_Chunk *chunk;
+	char *name = NULL;
+	int name_len = 0;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &name, &name_len) == FAILURE) RETURN_FALSE;
 
-	if (chunk = Mix_LoadWAV(name)) {
-		SoundStruct *sound;
-		ObjectInit(ClassEntry_Sound, return_value, TSRMLS_C);
-		sound = zend_object_store_get_object(return_value, TSRMLS_C);
-		sound->chunk = chunk;
-	} else {
-		THROWF("Can't load sound '%s'", name);
-	}
+	if (!Sound_fromRW(&return_value, SDL_RWFromFile(name, "r"), TSRMLS_C)) THROWF("Can't load sound from file: '%s'", name);
+}
+
+// Sound::fromString($data)
+PHP_METHOD_ARGS(Sound, fromString) ARG_INFO(data) ZEND_END_ARG_INFO()
+PHP_METHOD(Sound, fromString)
+{
+	char *data = NULL;
+	int data_len = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &data, &data_len) == FAILURE) RETURN_FALSE;
+
+	if (!Sound_fromRW(&return_value, SDL_RWFromConstMem(data, data_len), TSRMLS_C)) THROWF("Can't load sound from string");
 }
 
 // Sound::play()
