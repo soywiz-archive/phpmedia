@@ -60,8 +60,11 @@ PHP_METHOD(Screen, init)
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glMatrixMode(GL_TEXTURE   ); glLoadIdentity();
-	glMatrixMode(GL_PROJECTION); glLoadIdentity();
+	glMatrixMode(GL_TEXTURE   );
+	glLoadIdentity();
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 	glOrtho(0, w, h, 0, -1.0, 1.0);
 	glTranslatef(0, 1, 0);
 

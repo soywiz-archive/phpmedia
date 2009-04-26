@@ -39,6 +39,8 @@
     * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Bitmap2cy $cy]
   * [http://phpmedia.googlecode.com/svn/www/icons/class.png][API_6Shader Shader]
     * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Shader11__construct __construct]
+    * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Shader5begin begin]
+    * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Shader3end end]
   * [http://phpmedia.googlecode.com/svn/www/icons/class.png][API_8Keyboard Keyboard]
     * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_8Keyboard7pressed pressed]
     * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_8Keyboard4down down]

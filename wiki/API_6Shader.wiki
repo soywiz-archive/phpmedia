@@ -3,4 +3,6 @@ Class to specify programs to execute for each pixel.
 
 <font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Shader11__construct __construct] ($shader_fragment<font color="#999"> = NULL</font>, $shader_vertex<font color="#999"> = NULL</font>) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Shader5begin begin] ($shader_params) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Shader3end end] () : <font color="#a88">void</font>
 </font>

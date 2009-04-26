@@ -180,16 +180,20 @@ void BitmapPrepareDraw(BitmapStruct *bitmap) {
 
 		glViewport(0, 0, screen->w, screen->h + 1);
 
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
 		glMatrixMode(GL_TEXTURE   );
-		glPopMatrix();
+		glLoadIdentity();
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, screen->w, screen->h, 0, -1.0, 1.0);
+		glTranslatef(0, 1, 0);
 
 		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glShadeModel(GL_SMOOTH);
 	} else {
 		glViewport(bitmap->x, bitmap->y, bitmap->w, bitmap->h);
+		//printf("(%f, %f)-(%f, %f)\n", (float)bitmap->x, (float)bitmap->y, (float)bitmap->w, (float)bitmap->h);
 
 		if (fbo_selected_draw == bitmap->gltex) return;
 		fbo_selected_draw = bitmap->gltex;
@@ -199,18 +203,14 @@ void BitmapPrepareDraw(BitmapStruct *bitmap) {
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, bitmap->gltex, 0);
 
 		glMatrixMode(GL_TEXTURE);
-		glPushMatrix();
-
 		glLoadIdentity();
 
 		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
 		glLoadIdentity();
 		glOrtho(0, bitmap->surface->w, 0, bitmap->surface->h, -1.0, 1.0);
 		glTranslatef(0, 1, 0);
 
 		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
 		glLoadIdentity();
 
 		glShadeModel(GL_SMOOTH);

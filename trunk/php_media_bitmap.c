@@ -251,35 +251,28 @@ PHP_METHOD(Bitmap, blit)
 	double x = 0, y = 0;
 	double size = 1, rotation = 0, alpha = 1;
 	BitmapStruct *source, *dest;
-	ShaderStruct *shader;
-	BitmapStruct *sources[12];
+	ShaderStruct *shader = NULL;
 	double w, h, cx, cy;
-	double tx[12][2], ty[12][2];
-	int tex_count = 0, n;
+	double tx[16][2], ty[16][2];
+	int n;
 	THIS_BITMAP;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "O|dddddOa", &object_bitmap, ClassEntry_Bitmap, &x, &y, &size, &rotation, &alpha, &object_shader, ClassEntry_Shader, &shader_params) == FAILURE) RETURN_FALSE;
 	
 	source = bitmap;
-	dest = (BitmapStruct *)zend_object_store_get_object(object_bitmap, TSRMLS_C);
+	dest   = (BitmapStruct *)zend_object_store_get_object(object_bitmap, TSRMLS_C);
+
+	if (source->surface == screen) { THROWF("Can't blit the screen on a bitmap."); RETURN_FALSE; }
 	
 	BitmapPrepare(source);
 	BitmapPrepareDraw(dest);
 	
-	sources[tex_count++] = source;
+	if (glUseProgram && object_shader) {
+		shader = (ShaderStruct *)zend_object_store_get_object(object_shader, TSRMLS_C);
+		shader_begin(shader, shader_params, TSRMLS_C);
+	}
 
-	if (source == dest) {
-		THROWF("Can't draw a bitmap on itself.");
-		RETURN_FALSE;
-	}
-	
-	if (source->surface == screen) {
-		THROWF("Can't blit the screen on a bitmap.");
-		RETURN_FALSE;		
-	}
-	
-	shader = (ShaderStruct *)zend_object_store_get_object(object_shader, TSRMLS_C);
-	if (glUseProgram && object_shader) shader_begin(shader, shader_params, TSRMLS_C);
+	shader_bitmaps[0] = source;
 	
 	glLoadIdentity();
 	glTranslated(x, y, 0);
@@ -293,36 +286,33 @@ PHP_METHOD(Bitmap, blit)
 	glEnable(GL_BLEND);
 	glColor4d(1, 1, 1, alpha);
 	
-	if (source->smooth) {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	} else {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	{
+		int filter = source->smooth ? GL_LINEAR : GL_NEAREST;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 	}
-	
 
-	for (n = 0; n < tex_count; n++) {
-		tx[n][0] = (double)(sources[n]->x + 0            ) / (double)sources[n]->surface->w;
-		tx[n][1] = (double)(sources[n]->x + sources[n]->w) / (double)sources[n]->surface->w;
-		ty[n][0] = (double)(sources[n]->y + 0            ) / (double)sources[n]->surface->h;
-		ty[n][1] = (double)(sources[n]->y + sources[n]->h) / (double)sources[n]->surface->h;
+	for (n = 0; n < shader_bitmaps_count; n++) {
+		tx[n][0] = (double)(shader_bitmaps[n]->x + 0                   ) / (double)shader_bitmaps[n]->surface->w;
+		tx[n][1] = (double)(shader_bitmaps[n]->x + shader_bitmaps[n]->w) / (double)shader_bitmaps[n]->surface->w;
+		ty[n][0] = (double)(shader_bitmaps[n]->y + 0                   ) / (double)shader_bitmaps[n]->surface->h;
+		ty[n][1] = (double)(shader_bitmaps[n]->y + shader_bitmaps[n]->h) / (double)shader_bitmaps[n]->surface->h;
 
-		tx[n][0] *= (double)sources[0]->w / (double)sources[n]->w;
-		tx[n][1] *= (double)sources[0]->w / (double)sources[n]->w;
-		ty[n][0] *= (double)sources[0]->h / (double)sources[n]->h;
-		ty[n][1] *= (double)sources[0]->h / (double)sources[n]->h;
+		tx[n][0] *= (double)shader_bitmaps[0]->w / (double)shader_bitmaps[n]->w;
+		tx[n][1] *= (double)shader_bitmaps[0]->w / (double)shader_bitmaps[n]->w;
+		ty[n][0] *= (double)shader_bitmaps[0]->h / (double)shader_bitmaps[n]->h;
+		ty[n][1] *= (double)shader_bitmaps[0]->h / (double)shader_bitmaps[n]->h;
 		
 		//printf("(%f, %f)-(%f, %f)\n", (float)tx[n][0], (float)ty[n][0], (float)tx[n][1], (float)ty[n][1]);
 	}
 	
-	w = source->w;
-	h = source->h;
+	w  = source->w;
+	h  = source->h;
 	cx = source->cx;
 	cy = source->cy;
 	
 	#define QUAD_POINT(X, Y) { \
-		for (n = 0; n < tex_count; n++) glMultiTexCoord2d(GL_TEXTURE0 + n, tx[n][X], ty[n][Y]); \
+		for (n = 0; n < shader_bitmaps_count; n++) glMultiTexCoord2d(GL_TEXTURE0 + n, tx[n][X], ty[n][Y]); \
 		glVertex2d((X * w) - cx, (Y * h) - cy); \
 	}
 		
@@ -334,7 +324,7 @@ PHP_METHOD(Bitmap, blit)
 		QUAD_POINT(0, 1);
 	glEnd();
 
-	if (glUseProgram && object_shader) shader_end(TSRMLS_C);	
+	if (shader) shader_end(TSRMLS_C);	
 	
 	RETURN_TRUE;
 }
