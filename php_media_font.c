@@ -94,7 +94,7 @@ PHP_METHOD(Font, metrics)
 		int minx, miny;
 		int maxx, maxy;
 		int advance;
-		Uint16 ch = (Uint16)utf8_decode(key, NULL);
+		Uint16 ch = utf8_decode(key, NULL);
 		TTF_GlyphMetrics(font->font, ch, &minx, &maxx, &miny, &maxy, &advance);
 		
 		MAKE_STD_ZVAL(array);
@@ -126,10 +126,24 @@ PHP_METHOD(Font, height)
 	
 }
 
-// Font::blit(Bitmap $dest, $x, $y, $color)
+// Font::blit(Bitmap $dest, $text, $x, $y, $color)
 PHP_METHOD_ARGS(Font, blit) ARG_INFO(text) ZEND_END_ARG_INFO()
 PHP_METHOD(Font, blit)
 {
+	zval *object_bitmap = NULL;
+	char *str = NULL; int str_len = 0;
+	int ptr_pos = 0; int ptr_inc = 0;
+	SDL_Color color = {0xFF, 0xFF, 0xFF};
+	Uint16 ch = 0;
+	SDL_Surface *surface;
 	THIS_FONT;
-	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "") == FAILURE) RETURN_FALSE;
+	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Os", &object_bitmap, ClassEntry_Font, &str, &str_len) == FAILURE) RETURN_FALSE;
+	while (ptr_pos < str_len) {
+		ch = utf8_decode(&str[ptr_pos], &ptr_inc); ptr_pos += ptr_inc;
+		//if (ch == 0) break;
+		surface = TTF_RenderGlyph_Blended(font->font, ch, color);
+		{
+		}
+		SDL_FreeSurface(surface);
+	}
 }
