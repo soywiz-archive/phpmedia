@@ -1,4 +1,5 @@
 #summary Nave sample
+#labels samples
 
 http://phpmedia.googlecode.com/files/nave_sample.7z
 
