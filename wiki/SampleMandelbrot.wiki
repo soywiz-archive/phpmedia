@@ -2,21 +2,26 @@
 
 {{{
 <?php
+	// Initializes the window.
 	Screen::title('PHP Mandelbrot explorer');
 	$screen = Screen::init(640, 480);
+
+	// Shortcut for keyboard.
 	$key = 'Keyboard';
+	
+	// Creates an empty bitmap to use for vertex for the shader.
 	$out = new Bitmap($screen->w, $screen->h);
 	
 	// http://www.opengl.org/registry/doc/GLSLangSpec.Full.1.30.08.pdf
-	// http://en.wikipedia.org/wiki/Mandelbrot_set
-	$shader = new Shader("
+	$shader_mandelbrot = new Shader("
 		varying vec3 position;
 		uniform float maxIterations;
 		uniform vec2 center;
 		uniform vec4 outerColor1;
 		uniform vec4 outerColor2;
 		uniform float zoom;
-		
+
+		// http://en.wikipedia.org/wiki/Mandelbrot_set
 		void main()
 		{
 			vec2 z = vec2(position) * (1.0 / zoom) + center;
@@ -44,38 +49,51 @@
 		}
 	");
 
-	$z = 2.2;
-	$cx = -0.75;
-	$cy = 0;
-	$iters = 100;
+	// Initial values.
+	$zoom = 2.2;
+	list($center_x, $center_y) = array(-0.75, 0);
+	$maxIterations = 100;
+
+	// Loops until pressing ESC key.
 	while (!$key::pressed($key::ESC))
 	{
-		if ($key::down($key::W    )) $z *= 1.03;
-		if ($key::down($key::S    )) $z /= 1.03;
-		if ($key::down($key::A    )) $iters--;
-		if ($key::down($key::D    )) $iters++;
-		
-		Math::clamp($iters, 5, 150);
+		// Zoom and maxIterations.
+		if ($key::down($key::W    )) $zoom *= 1.03;
+		if ($key::down($key::S    )) $zoom /= 1.03;
+		if ($key::down($key::A    )) $maxIterations--;
+		if ($key::down($key::D    )) $maxIterations++;
 
-		$move = 0.1 / $z;
-		if ($key::down($key::LEFT )) $cx -= $move;
-		if ($key::down($key::RIGHT)) $cx += $move;
-		if ($key::down($key::UP   )) $cy -= $move;
-		if ($key::down($key::DOWN )) $cy += $move;
-		
-		Math::clamp($cx, -2.0, 0.5);
-		Math::clamp($cy, -1.12, 1.12);
-		Math::clamp($z, 2.2, 128000);
+		// Limit the iterations.
+		Math::clamp($maxIterations, 5, 150);
+		// Limit the zoom.
+		Math::clamp($zoom, 2.2, 128000);
 
-		printf("C(%f, %f), %f, %f\t\t\r", $cx, $cy, $z, $iters);
-		$screen->blit($out, 0, 0, 1, 0, 1, $shader, array(
-			'maxIterations' => $iters,
-			'center'        => array($cx, $cy),
+		// Determines the movement speed.
+		$move = 0.1 / $zoom;
+
+		// Desplacement of the center.
+		if ($key::down($key::LEFT )) $center_x -= $move;
+		if ($key::down($key::RIGHT)) $center_x += $move;
+		if ($key::down($key::UP   )) $center_y -= $move;
+		if ($key::down($key::DOWN )) $center_y += $move;
+
+		// Limits the position and the zoom.
+		Math::clamp($center_x, -2.0, 0.5);
+		Math::clamp($center_y, -1.12, 1.12);
+
+		// Print the parameters for the mandelbrot.
+		printf("Center(%f, %f), Zoom(%.2f), Iterations(%d)\t\r", $center_x, $center_y, $zoom, $maxIterations);
+
+		// Blits the mandelbrot on the screen.
+		$screen->blit($out, 0, 0, 1, 0, 1, $shader_mandelbrot, array(
+			'maxIterations' => $maxIterations,
+			'center'        => array($center_x, $center_y),
 			'outerColor1'   => array(1, 1, 1, 0),
 			'outerColor2'   => array(1, 1, 1, 1),
-			'zoom'          => $z,
+			'zoom'          => $zoom,
 		));
 
+		// Input reading. Buffer swap. Clearning new screen.
 		Screen::frame();
 	}
 ?>
