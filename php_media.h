@@ -35,6 +35,10 @@ typedef struct {
 	GLuint shader_vertex;
 } ShaderStruct;
 
+typedef struct {
+	zend_object std;
+} FontStruct;
+
 #define PHP_METHODS_NAME(CLASS) CLASS##_Methods
 #define PHP_METHOD_NAME_ARGINFO(CLASS, METHOD) arginfo_##CLASS##METHOD
 
@@ -44,10 +48,13 @@ typedef struct {
 #define STRUCT_CREATE(TYPE, VAR) VAR = emalloc(sizeof(TYPE)); memset(VAR, 0, sizeof(TYPE));
 #define PHP_METHOD_ARGS(CLASS, METHOD) ZEND_BEGIN_ARG_INFO_EX(PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), 0, 0, 1)
 #define ARG_INFO(name) ZEND_ARG_INFO(0, name)
-#define THIS_BITMAP GET_THIS_TYPE(BitmapStruct, bitmap);
-#define THIS_SOUND GET_THIS_TYPE(SoundStruct, sound);
-#define THIS_SHADER GET_THIS_TYPE(ShaderStruct, shader);
-#define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), ATT)
+
+// This
+#define THIS_BITMAP    GET_THIS_TYPE(BitmapStruct, bitmap);
+#define THIS_SOUND     GET_THIS_TYPE(SoundStruct, sound);
+#define THIS_SHADER    GET_THIS_TYPE(ShaderStruct, shader);
+#define THIS_FONT      GET_THIS_TYPE(FontStruct, font);
+
 #define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), ATT)
 #define PHP_ME_END {NULL, NULL, NULL}
 #define PHP_FE_END {NULL, NULL, NULL}
@@ -60,3 +67,48 @@ typedef struct {
 #define PM_HANDLERS_INIT(TYPE) memcpy(CurrentHandlers = &TYPE, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 #define PM_HANDLERS_ADD(TYPE, FUNC) CurrentHandlers->TYPE = FUNC;
 #define PM_CLASS_ADD(TYPE, FUNC) ClassEntry.TYPE = FUNC;
+#define PM_OBJECTDELETE(TYPE) static void TYPE##__ObjectDelete(TYPE##Struct *object, TSRMLS_D)
+#define PM_OBJECTDELETE_STD { zend_object_std_dtor(&object->std, TSRMLS_C); efree(object); }
+#define PM_OBJECTNEW(TYPE) \
+	static zend_object_value TYPE##__ObjectNew_ex(zend_class_entry *class_type, TYPE##Struct **ptr, TSRMLS_D) \
+	{ \
+		TYPE##Struct *intern; \
+		zend_object_value retval; \
+		zval *tmp; \
+		 \
+		STRUCT_CREATE(TYPE##Struct, intern); \
+		if (ptr != NULL) *ptr = intern; \
+		 \
+		zend_object_std_init(&intern->std, class_type, TSRMLS_C); \
+		zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *)); \
+		 \
+		retval.handle = zend_objects_store_put( \
+			intern, \
+			(zend_objects_store_dtor_t)zend_objects_destroy_object, \
+			(zend_objects_free_object_storage_t) TYPE##__ObjectDelete, \
+			NULL, \
+			TSRMLS_C \
+		); \
+	 \
+		retval.handlers = &Handlers_##TYPE; \
+		 \
+		return retval; \
+	} \
+	 \
+	static zend_object_value TYPE##__ObjectNew(zend_class_entry *class_type, TSRMLS_D) \
+	{ \
+		return TYPE##__ObjectNew_ex(class_type, NULL, TSRMLS_C); \
+	}
+
+#define PM_OBJECTCLONE_IMPL(TYPE) PM_Clone_##TYPE(TYPE##Struct *old_obj, TYPE##Struct *new_obj)
+
+#define PM_OBJECTCLONE(TYPE) \
+	static zend_object_value TYPE##__ObjectClone(zval *this_ptr, TSRMLS_D) \
+	{ \
+		TYPE##Struct *new_obj = NULL; \
+		TYPE##Struct *old_obj = (TYPE##Struct *)zend_object_store_get_object(this_ptr, TSRMLS_C); \
+		zend_object_value new_ov = TYPE##__ObjectNew_ex(old_obj->std.ce, &new_obj, TSRMLS_C); \
+		zend_objects_clone_members(&new_obj->std, new_ov, &old_obj->std, Z_OBJ_HANDLE_P(this_ptr), TSRMLS_C); \
+		PM_Clone_##TYPE(old_obj, new_obj); \
+		return new_ov; \
+	}

@@ -1,54 +1,17 @@
-static void Sound__ObjectDelete(SoundStruct *sound, TSRMLS_D)
+PM_OBJECTDELETE(Sound)
 {
-	if (sound->chunk != NULL)
-	{
-		Mix_FreeChunk(sound->chunk);
+	if (object->chunk) {
+		Mix_FreeChunk(object->chunk);
 	}
-	zend_object_std_dtor(&sound->std, TSRMLS_C);
-	efree(sound);
+	PM_OBJECTDELETE_STD;
 }
 
-static zend_object_value Sound__ObjectNew_ex(zend_class_entry *class_type, SoundStruct **ptr, TSRMLS_D)
-{
-	SoundStruct *intern;
-	zend_object_value retval;
-	zval *tmp;
-
-	STRUCT_CREATE(SoundStruct, intern);
-	if (ptr != NULL) *ptr = intern;
-	
-	zend_object_std_init(&intern->std, class_type, TSRMLS_C);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
-	
-	retval.handle = zend_objects_store_put(
-		intern,
-		(zend_objects_store_dtor_t)zend_objects_destroy_object,
-		(zend_objects_free_object_storage_t) Sound__ObjectDelete,
-		NULL,
-		TSRMLS_C
-	);
-
-	retval.handlers = &Handlers_Sound;
-	
-	return retval;
+PM_OBJECTCLONE_IMPL(Sound) {
+	//CLONE_COPY_FIELD(chunk);
 }
 
-static zend_object_value Sound__ObjectNew(zend_class_entry *class_type, TSRMLS_D)
-{
-	return Sound__ObjectNew_ex(class_type, NULL, TSRMLS_C);
-}
-
-static zend_object_value Sound__ObjectClone(zval *this_ptr, TSRMLS_D)
-{
-	SoundStruct *new_obj = NULL;
-	SoundStruct *old_obj = (SoundStruct *)zend_object_store_get_object(this_ptr, TSRMLS_C);
-
-	zend_object_value new_ov = Sound__ObjectNew_ex(old_obj->std.ce, &new_obj, TSRMLS_C);
-	
-	zend_objects_clone_members(&new_obj->std, new_ov, &old_obj->std, Z_OBJ_HANDLE_P(this_ptr), TSRMLS_C);
-	
-	return new_ov;
-}
+PM_OBJECTNEW(Sound);
+PM_OBJECTCLONE(Sound);
 
 int Sound_fromRW(zval **return_value, SDL_RWops *rw, TSRMLS_D)
 {

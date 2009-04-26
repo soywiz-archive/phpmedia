@@ -1,41 +1,18 @@
-static void Shader__ObjectDelete(ShaderStruct *shader, TSRMLS_D)
+PM_OBJECTDELETE(Shader)
 {
-	glDeleteProgram(shader->program);
-	glDeleteShader(shader->shader_fragment);
-	glDeleteShader(shader->shader_vertex);
-	zend_object_std_dtor(&shader->std, TSRMLS_C);
-	efree(shader);
+	glDeleteProgram(object->program);
+	glDeleteShader(object->shader_fragment);
+	glDeleteShader(object->shader_vertex);
+	
+	PM_OBJECTDELETE_STD;
 }
 
-static zend_object_value Shader__ObjectNew_ex(zend_class_entry *class_type, ShaderStruct **ptr, TSRMLS_D)
-{
-	ShaderStruct *intern;
-	zend_object_value retval;
-	zval *tmp;
-
-	STRUCT_CREATE(ShaderStruct, intern);
-	if (ptr != NULL) *ptr = intern;
-	
-	zend_object_std_init(&intern->std, class_type, TSRMLS_C);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
-	
-	retval.handle = zend_objects_store_put(
-		intern,
-		(zend_objects_store_dtor_t)zend_objects_destroy_object,
-		(zend_objects_free_object_storage_t) Shader__ObjectDelete,
-		NULL,
-		TSRMLS_C
-	);
-
-	retval.handlers = &Handlers_Shader;
-	
-	return retval;
+PM_OBJECTCLONE_IMPL(Shader) {
+	//CLONE_COPY_FIELD(chunk);
 }
 
-static zend_object_value Shader__ObjectNew(zend_class_entry *class_type, TSRMLS_D)
-{
-	return Shader__ObjectNew_ex(class_type, NULL, TSRMLS_C);
-}
+PM_OBJECTNEW(Shader);
+PM_OBJECTCLONE(Shader);
 
 PHP_METHOD_ARGS(Shader, __construct) ARG_INFO(str) ZEND_END_ARG_INFO()
 PHP_METHOD(Shader, __construct)

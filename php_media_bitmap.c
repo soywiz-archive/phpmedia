@@ -1,54 +1,13 @@
-static void Bitmap__ObjectDelete(BitmapStruct *bitmap, TSRMLS_D)
+PM_OBJECTDELETE(Bitmap)
 {
-	if (bitmap->surface) {
-		if (bitmap->surface->refcount <= 1) glDeleteTextures(1, &bitmap->gltex);
-		SDL_FreeSurface(bitmap->surface);
+	if (object->surface) {
+		if (object->surface->refcount <= 1) glDeleteTextures(1, &object->gltex);
+		SDL_FreeSurface(object->surface);
 	}
-	zend_object_std_dtor(&bitmap->std, TSRMLS_C);
-	efree(bitmap);
+	PM_OBJECTDELETE_STD;
 }
 
-static zend_object_value Bitmap__ObjectNew_ex(zend_class_entry *class_type, BitmapStruct **ptr, TSRMLS_D)
-{
-	BitmapStruct *intern;
-	zend_object_value retval;
-	zval *tmp;
-
-	//printf("Bitmap__ObjectNew\n");
-
-	STRUCT_CREATE(BitmapStruct, intern);
-	if (ptr != NULL) *ptr = intern;
-	
-	zend_object_std_init(&intern->std, class_type, TSRMLS_C);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
-	
-	retval.handle = zend_objects_store_put(
-		intern,
-		(zend_objects_store_dtor_t)zend_objects_destroy_object,
-		(zend_objects_free_object_storage_t) Bitmap__ObjectDelete,
-		NULL,
-		TSRMLS_C
-	);
-
-	retval.handlers = &Handlers_Bitmap;
-	
-	return retval;
-}
-
-static zend_object_value Bitmap__ObjectNew(zend_class_entry *class_type, TSRMLS_D)
-{
-	return Bitmap__ObjectNew_ex(class_type, NULL, TSRMLS_C);
-}
-
-static zend_object_value Bitmap__ObjectClone(zval *this_ptr, TSRMLS_D)
-{
-	BitmapStruct *new_obj = NULL;
-	BitmapStruct *old_obj = (BitmapStruct *)zend_object_store_get_object(this_ptr, TSRMLS_C);
-
-	zend_object_value new_ov = Bitmap__ObjectNew_ex(old_obj->std.ce, &new_obj, TSRMLS_C);
-	
-	zend_objects_clone_members(&new_obj->std, new_ov, &old_obj->std, Z_OBJ_HANDLE_P(this_ptr), TSRMLS_C);
-
+PM_OBJECTCLONE_IMPL(Bitmap) {
 	//CLONE_COPY_FIELD(surface->w);
 	//CLONE_COPY_FIELD(surface->h);
 	CLONE_COPY_FIELD(parent);
@@ -62,10 +21,10 @@ static zend_object_value Bitmap__ObjectClone(zval *this_ptr, TSRMLS_D)
 	CLONE_COPY_FIELD(h);
 	CLONE_COPY_FIELD(smooth);
 	new_obj->surface->refcount++;
-	
-	return new_ov;
 }
 
+PM_OBJECTNEW(Bitmap);
+PM_OBJECTCLONE(Bitmap);
 
 // Bitmap::__construct($w, $h)
 PHP_METHOD_ARGS(Bitmap, __construct) ARG_INFO(w) ARG_INFO(h) ZEND_END_ARG_INFO()
