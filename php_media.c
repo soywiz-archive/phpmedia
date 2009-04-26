@@ -26,8 +26,11 @@ static zend_class_entry    *ClassEntry_Font;
 
 PM_METHODS(Font)
 {
+	PHP_ME_AI(Font, __set     , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Font, __get     , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Font, fromFile  , ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
 	PHP_ME_AI(Font, fromString, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Font, metrics   , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Font, width     , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Font, height    , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Font, blit      , ZEND_ACC_PUBLIC)
@@ -226,6 +229,11 @@ static void register_classes(TSRMLS_D)
 		ClassEntry_Font = CurrentClassEntry;
 		PM_HANDLERS_INIT(Handlers_Font);
 		PM_HANDLERS_ADD(clone_obj, Font__ObjectClone);
+		
+		CLASS_REGISTER_CONSTANT_INT("STYLE_NORMAL", TTF_STYLE_NORMAL);
+		CLASS_REGISTER_CONSTANT_INT("STYLE_BOLD", TTF_STYLE_BOLD);
+		CLASS_REGISTER_CONSTANT_INT("STYLE_ITALIC", TTF_STYLE_ITALIC);
+		CLASS_REGISTER_CONSTANT_INT("STYLE_UNDERLINE", TTF_STYLE_UNDERLINE);
 	}
 
 	{ // Math

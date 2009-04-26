@@ -3,6 +3,22 @@ void clamp(int *v, int min, int max) {
 	if (*v > max) *v = max;
 }
 
+unsigned int utf8_decode(unsigned char *ptr, int *len) {
+	if (ptr[0] < 128) {
+		if (len != NULL) *len = 1;
+		return ptr[0];
+	}
+	else if ((ptr[0] > 191) && (ptr[0] < 224)) {
+		if (len != NULL) *len = 2;
+		return ((ptr[0] & 31) << 6) | (ptr[1] & 63);
+	}
+	else {
+		if (len != NULL) *len = 3;
+		return ((ptr[0] & 15) << 12) | ((ptr[1] & 63) << 6) | (ptr[2] & 63);
+	}
+	return 0;
+}
+
 void FrameProcess() {
 	if (music != NULL && !Mix_PlayingMusic()) {
 		Mix_FreeMusic(music);

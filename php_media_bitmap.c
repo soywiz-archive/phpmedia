@@ -55,15 +55,17 @@ PHP_METHOD(Bitmap, __set)
 	char *key; int key_l; int v;
 	THIS_BITMAP;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "sl", &key, &key_l, &v) == FAILURE) RETURN_FALSE;
-
-	switch (key_l) {
-		case 2:
-			if (strcmp(key, "cx") == 0) RETURN_LONG((bitmap) ? bitmap->cx = v : 0);
-			if (strcmp(key, "cy") == 0) RETURN_LONG((bitmap) ? bitmap->cy = v : 0);
-		break;
-		case 6:
-			if (strcmp(key, "smooth") == 0) RETURN_LONG((bitmap) ? bitmap->smooth = v : 0);
-		break;
+	
+	if (bitmap) {
+		switch (key_l) {
+			case 2:
+				if (strcmp(key, "cx") == 0) RETURN_LONG(bitmap->cx = v);
+				if (strcmp(key, "cy") == 0) RETURN_LONG(bitmap->cy = v);
+			break;
+			case 6:
+				if (strcmp(key, "smooth") == 0) RETURN_LONG(bitmap->smooth = v);
+			break;
+		}
 	}
 
 	RETURN_FALSE;
@@ -77,18 +79,20 @@ PHP_METHOD(Bitmap, __get)
 	THIS_BITMAP;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &key, &key_l) == FAILURE) RETURN_FALSE;
 
-	switch (key_l) {
-		case 1:
-			if (strcmp(key, "w") == 0) RETURN_LONG((bitmap && bitmap->surface) ? bitmap->w : 0);
-			if (strcmp(key, "h") == 0) RETURN_LONG((bitmap && bitmap->surface) ? bitmap->h : 0);
-		break;
-		case 2:
-			if (strcmp(key, "cx") == 0) RETURN_LONG((bitmap) ? bitmap->cx : 0);
-			if (strcmp(key, "cy") == 0) RETURN_LONG((bitmap) ? bitmap->cy : 0);
-		break;
-		case 6:
-			if (strcmp(key, "smooth") == 0) RETURN_LONG((bitmap) ? bitmap->smooth : 0);
-		break;
+	if (bitmap) {
+		switch (key_l) {
+			case 1:
+				if (strcmp(key, "w") == 0) RETURN_LONG(bitmap->w);
+				if (strcmp(key, "h") == 0) RETURN_LONG(bitmap->h);
+			break;
+			case 2:
+				if (strcmp(key, "cx") == 0) RETURN_LONG(bitmap->cx);
+				if (strcmp(key, "cy") == 0) RETURN_LONG(bitmap->cy);
+			break;
+			case 6:
+				if (strcmp(key, "smooth") == 0) RETURN_LONG(bitmap->smooth);
+			break;
+		}
 	}
 
 	RETURN_FALSE;
@@ -375,7 +379,7 @@ PHP_METHOD(Bitmap, blit)
 
 								tex_count++;
 							} else {
-								zend_error(E_WARNING, "Only can process Bitmap objects");
+								zend_error(E_WARNING, "Uniform '%s' can only process Bitmap objects", key);
 							}							
 						} break;
 					}
