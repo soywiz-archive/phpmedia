@@ -3,7 +3,7 @@ void clamp(int *v, int min, int max) {
 	if (*v > max) *v = max;
 }
 
-unsigned int utf8_decode(unsigned char *ptr, int *len) {
+unsigned short utf8_decode(unsigned char *ptr, int *len) {
 	if (ptr[0] < 128) {
 		if (len != NULL) *len = 1;
 		return ptr[0];
