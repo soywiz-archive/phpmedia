@@ -46,12 +46,17 @@ PFNGLATTACHSHADERPROC              glAttachShader              = NULL;
 PFNGLGETSHADERINFOLOGPROC          glGetShaderInfoLog          = NULL;
 
 PFNGLGETUNIFORMLOCATIONPROC        glGetUniformLocation        = NULL;
-PFNGLUNIFORM1FPROC                 glUniform1f                 = NULL;
-PFNGLUNIFORM2FPROC                 glUniform2f                 = NULL;
-PFNGLUNIFORM3FPROC                 glUniform3f                 = NULL;
-PFNGLUNIFORM4FPROC                 glUniform4f                 = NULL;
+PFNGLGETACTIVEUNIFORMPROC          glGetActiveUniform          = NULL;
 
-PFNGLUNIFORM1IPROC                 glUniform1i                 = NULL;
+PFNGLUNIFORM1FVPROC                glUniform1fv                = NULL;
+PFNGLUNIFORM2FVPROC                glUniform2fv                = NULL;
+PFNGLUNIFORM3FVPROC                glUniform3fv                = NULL;
+PFNGLUNIFORM4FVPROC                glUniform4fv                = NULL;
+
+PFNGLUNIFORM1IVPROC                glUniform1iv                = NULL;
+PFNGLUNIFORM2IVPROC                glUniform2iv                = NULL;
+PFNGLUNIFORM3IVPROC                glUniform3iv                = NULL;
+PFNGLUNIFORM4IVPROC                glUniform4iv                = NULL;
 
 PFNGLACTIVETEXTUREPROC             glActiveTexture             = NULL;
 PFNGLMULTITEXCOORD2DPROC           glMultiTexCoord2d           = NULL;
@@ -73,12 +78,18 @@ void glInitExsts() {
 	GL_LOAD_FUNC(glGetShaderInfoLog);
 
 	GL_LOAD_FUNC(glGetUniformLocation);
-	GL_LOAD_FUNC(glUniform1f);
-	GL_LOAD_FUNC(glUniform2f);
-	GL_LOAD_FUNC(glUniform3f);
-	GL_LOAD_FUNC(glUniform4f);
-	GL_LOAD_FUNC(glUniform1i);
-	
+	GL_LOAD_FUNC(glGetActiveUniform);
+
+	GL_LOAD_FUNC(glUniform1fv);
+	GL_LOAD_FUNC(glUniform2fv);
+	GL_LOAD_FUNC(glUniform3fv);
+	GL_LOAD_FUNC(glUniform4fv);
+
+	GL_LOAD_FUNC(glUniform1iv);
+	GL_LOAD_FUNC(glUniform2iv);
+	GL_LOAD_FUNC(glUniform3iv);
+	GL_LOAD_FUNC(glUniform4iv);
+
 	GL_LOAD_FUNC(glActiveTexture);
 	GL_LOAD_FUNC(glMultiTexCoord2d);
 }
