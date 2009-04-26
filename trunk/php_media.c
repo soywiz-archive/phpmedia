@@ -9,9 +9,11 @@ static char gl_error[0x800];
 static zend_object_handlers Handlers_Bitmap;
 static zend_object_handlers Handlers_Sound;
 static zend_object_handlers Handlers_Shader;
+static zend_object_handlers Handlers_Font;
 static zend_class_entry    *ClassEntry_Bitmap;
 static zend_class_entry    *ClassEntry_Sound;
 static zend_class_entry    *ClassEntry_Shader;
+static zend_class_entry    *ClassEntry_Font;
 
 #include "php_media_utils.c"
 #include "php_media_shader.c"
@@ -129,6 +131,7 @@ static void register_classes(TSRMLS_D)
 		ClassEntry_Shader = CurrentClassEntry;
 
 		PM_HANDLERS_INIT(Handlers_Shader);
+		PM_HANDLERS_ADD(clone_obj, Shader__ObjectClone);
 	}
 
 	{ // Screen
@@ -217,11 +220,11 @@ static void register_classes(TSRMLS_D)
 
 	{ // Font
 		PM_CLASS_INIT(Font);
-		//PM_CLASS_ADD(create_object, Font__ObjectNew)
+		PM_CLASS_ADD(create_object, Font__ObjectNew)
 		PM_CLASS_REGISTER();
-		//ClassEntry_Font = CurrentClassEntry;
+		ClassEntry_Font = CurrentClassEntry;
 		PM_HANDLERS_INIT(Handlers_Sound);
-		//PM_HANDLERS_ADD(clone_obj, Sound__ObjectClone);
+		PM_HANDLERS_ADD(clone_obj, Font__ObjectClone);
 	}
 
 	{ // Math
