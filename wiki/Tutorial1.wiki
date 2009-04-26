@@ -25,7 +25,7 @@ phpMedia
     $bmp = Bitmap::fromFile('sample.png');
 
     while (true) {
-        $screen->blit($bmp);
+        $bmp->blit($screen);
         Screen::frame();
     }
 ?>
