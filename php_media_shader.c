@@ -27,7 +27,7 @@ static zend_object_value Shader__ObjectNew_ex(zend_class_entry *class_type, Shad
 		TSRMLS_C
 	);
 
-	retval.handlers = &Shader_Handlers;
+	retval.handlers = &Handlers_Shader;
 	
 	return retval;
 }
@@ -60,11 +60,11 @@ PHP_METHOD(Shader, __construct)
 		glShaderSource(shader->shader_vertex, 1, &str_shader_vertex, &str_shader_vertex_len);
 		glCompileShader(shader->shader_vertex);
 		glGetShaderiv(shader->shader_vertex, GL_INFO_LOG_LENGTH, &r);
-		if (0) {
+		if (r) {
 			glGetShaderInfoLog(shader->shader_vertex, sizeof(gl_error), &r, gl_error);
 			if (strlen(gl_error)) {
 				//THROWF("Can't load vertex shader ('%s')", gl_error);
-				//zend_error(E_WARNING, "Vertex Shader: '%s'", gl_error);
+				zend_error(E_WARNING, "Vertex Shader: '%s'", gl_error);
 			}
 		}
 		glAttachShader(shader->program, shader->shader_vertex);
@@ -79,7 +79,7 @@ PHP_METHOD(Shader, __construct)
 			glGetShaderInfoLog(shader->shader_fragment, sizeof(gl_error), &r, gl_error);
 			if (strlen(gl_error)) {
 				//THROWF("Can't load fragment shader ('%s')", gl_error);
-				//zend_error(E_WARNING, "Fragment Shader: '%s'", gl_error);
+				zend_error(E_WARNING, "Fragment Shader: '%s'", gl_error);
 			}
 		}
 		glAttachShader(shader->program, shader->shader_fragment);
@@ -91,7 +91,7 @@ PHP_METHOD(Shader, __construct)
 		glGetShaderInfoLog(shader->program, sizeof(gl_error), &r, gl_error);
 		if (strlen(gl_error)) {
 			//THROWF("Can't link program ('%s')", gl_error);
-			zend_error(E_WARNING, "Shader Program: '%s'", gl_error);
+			//zend_error(E_WARNING, "Shader Program: '%s'", gl_error);
 		}
 	}
 }

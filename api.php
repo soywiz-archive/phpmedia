@@ -200,9 +200,9 @@ final class Bitmap {
 	public function clear($r = 0.0, $g = 0.0, $b = 0.0, $a = 0.0) { } // array(0.0, 0.0, 0.0, 0.0)
 
 	/**
-	 * Blits the specified bitmap in the current one.
+	 * Blits this bitmap in another.
 	 *
-	 * @param Bitmap $src Source bitmap.
+	 * @param Bitmap $dest Bitmap to blit on.
 	 * @param float  $x Red.
 	 * @param float  $y Green.
 	 * @param float  $size Size.
@@ -211,7 +211,7 @@ final class Bitmap {
 	 * @param Shader $shader Shader.
 	 * @param array  $shader_params Parameters for the shader.
 	 */
-	public function blit(Bitmap $src, $x, $y, $size = 1.0, $rotation = 0, $alpha = 1.0, Shader $shader = NULL, array $shader_params = NULL) { }
+	public function blit(Bitmap $dest, $x, $y, $size = 1.0, $rotation = 0, $alpha = 1.0, Shader $shader = NULL, array $shader_params = NULL) { }
 }
 
 /**

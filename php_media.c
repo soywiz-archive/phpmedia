@@ -6,12 +6,12 @@ int keys_status[SDLK_LAST];
 int keys_pressed[SDLK_LAST];
 static char gl_error[0x800];
 
-static zend_object_handlers Bitmap_Handlers;
-static zend_object_handlers Sound_Handlers;
-static zend_object_handlers Shader_Handlers;
-static zend_class_entry    *Bitmap_ClassEntry;
-static zend_class_entry    *Sound_ClassEntry;
-static zend_class_entry    *Shader_ClassEntry;
+static zend_object_handlers Handlers_Bitmap;
+static zend_object_handlers Handlers_Sound;
+static zend_object_handlers Handlers_Shader;
+static zend_class_entry    *ClassEntry_Bitmap;
+static zend_class_entry    *ClassEntry_Sound;
+static zend_class_entry    *ClassEntry_Shader;
 
 #include "php_media_utils.c"
 #include "php_media_shader.c"
@@ -19,12 +19,17 @@ static zend_class_entry    *Shader_ClassEntry;
 #include "php_media_screen.c"
 #include "php_media_input.c"
 #include "php_media_audio.c"
+#include "php_media_font.c"
 #include "php_media_math.c"
 
-PHP_FUNCTION(dummy)
+PM_METHODS(Font)
 {
-	RETURN_LONG(0);
-}
+	PHP_ME_AI(Font, fromFile, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Font, width   , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Font, height  , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Font, blit    , ZEND_ACC_PUBLIC)
+	PHP_ME_END
+};
 
 PM_METHODS(Bitmap)
 {
@@ -98,7 +103,6 @@ PM_METHODS(Shader)
 
 const zend_function_entry module_functions[] =
 {
-	PHP_FE(dummy, NULL)
 	PHP_FE_END
 };
 	
@@ -111,9 +115,9 @@ static void register_classes(TSRMLS_D)
 		PM_CLASS_INIT(Bitmap);
 		PM_CLASS_ADD(create_object, Bitmap__ObjectNew)
 		PM_CLASS_REGISTER();
-		Bitmap_ClassEntry = CurrentClassEntry;
+		ClassEntry_Bitmap = CurrentClassEntry;
 
-		PM_HANDLERS_INIT(Bitmap_Handlers);
+		PM_HANDLERS_INIT(Handlers_Bitmap);
 		PM_HANDLERS_ADD(clone_obj, Bitmap__ObjectClone);
 	}
 	
@@ -121,9 +125,9 @@ static void register_classes(TSRMLS_D)
 		PM_CLASS_INIT(Shader);
 		PM_CLASS_ADD(create_object, Shader__ObjectNew)
 		PM_CLASS_REGISTER();
-		Shader_ClassEntry = CurrentClassEntry;
+		ClassEntry_Shader = CurrentClassEntry;
 
-		PM_HANDLERS_INIT(Shader_Handlers);
+		PM_HANDLERS_INIT(Handlers_Shader);
 	}
 
 	{ // Screen
@@ -200,14 +204,23 @@ static void register_classes(TSRMLS_D)
 		PM_CLASS_INIT(Sound);
 		PM_CLASS_ADD(create_object, Sound__ObjectNew)
 		PM_CLASS_REGISTER();
-		Sound_ClassEntry = CurrentClassEntry;
-		PM_HANDLERS_INIT(Sound_Handlers);
+		ClassEntry_Sound = CurrentClassEntry;
+		PM_HANDLERS_INIT(Handlers_Sound);
 		PM_HANDLERS_ADD(clone_obj, Sound__ObjectClone);
 	}
 
 	{ // Music
 		PM_CLASS_INIT(Music);
 		PM_CLASS_REGISTER();
+	}
+
+	{ // Font
+		PM_CLASS_INIT(Font);
+		//PM_CLASS_ADD(create_object, Font__ObjectNew)
+		PM_CLASS_REGISTER();
+		//ClassEntry_Font = CurrentClassEntry;
+		PM_HANDLERS_INIT(Handlers_Sound);
+		//PM_HANDLERS_ADD(clone_obj, Sound__ObjectClone);
 	}
 
 	{ // Math
