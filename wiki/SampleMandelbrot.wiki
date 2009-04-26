@@ -82,7 +82,10 @@
 		Math::clamp($center_y, -1.12, 1.12);
 
 		// Print the parameters for the mandelbrot.
-		printf("Center(%f, %f), Zoom(%.2f), Iterations(%d)\t\r", $center_x, $center_y, $zoom, $maxIterations);
+		$info = sprintf("Center(%f, %f), Zoom(%.2f), Iterations(%d)", $center_x, $center_y, $zoom, $maxIterations);
+
+		Screen::title('PHP Mandelbrot explorer - ' . $info);
+		echo "{$info}\t\r";
 
 		// Blits the mandelbrot on the screen.
 		$out->blit($screen, 0, 0, 1, 0, 1, $shader_mandelbrot, array(
