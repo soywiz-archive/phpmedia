@@ -24,8 +24,8 @@
 		// http://en.wikipedia.org/wiki/Mandelbrot_set
 		void main()
 		{
-			vec2 z = vec2(position) * (1.0 / zoom) + center;
-			vec2 z0 = z;
+			vec2 z0 = vec2(position) * (1.0 / zoom) + center;
+			vec2 z = z0;
 			
 			for (int iteration = 0; iteration < int(maxIterations); iteration++)
 			{
