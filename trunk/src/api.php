@@ -131,6 +131,10 @@ final class Audio {
  * Class to handle, modify and draw images.
  */
 class Bitmap {
+	const FORMAT_BMP = 0;
+	const FORMAT_TGA = 1;
+	const FORMAT_PNG = 2;
+
 	//public $parent;
 	public $x, $y;
 	public $w, $h;
@@ -160,6 +164,13 @@ class Bitmap {
 	 * @return Bitmap
 	 */
 	static public function fromString($string) { }
+	
+	/**
+	 * Saves this Bitmap as a file in the specified format.
+	 *
+	 * @param string $filename File name.
+	 */
+	static public function saveFile($filename, $format = Bitmap::FORMAT_BMP) { }
 
 	/**
 	 * Duplicates the bitmap and the texture.

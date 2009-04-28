@@ -36,8 +36,18 @@ typedef struct {
 } ShaderStruct;
 
 typedef struct {
+	Uint16 ch;
+	Uint16 used;
+	GLuint gltex;
+	GLuint list;
+	SDL_Surface *surface;
+} FontGlyphCache;
+
+#define GLYPH_MAX_CACHE 0x100
+typedef struct {
 	zend_object std;
 	TTF_Font *font;
+	FontGlyphCache glyphs[GLYPH_MAX_CACHE];
 } FontStruct;
 
 #define PHP_METHODS_NAME(CLASS) CLASS##_Methods

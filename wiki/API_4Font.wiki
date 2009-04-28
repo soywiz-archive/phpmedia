@@ -2,6 +2,18 @@
 Class to draw texts on bitmaps.
 
 <font face="Lucida Console">
-  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Font8fromFile fromFile] ($filename, $size) : <font color="#a88">void</font>
-  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_4Font6render render] ($text, $x, $y) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Font8fromFile fromFile] ($filename, $size<font color="#999"> = 16</font>, $index<font color="#999"> = 0</font>) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Font10fromString fromString] ($filename, $size<font color="#999"> = 16</font>, $index<font color="#999"> = 0</font>) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_4Font5width width] ($text) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_4Font6height height] ($text<font color="#999"> = ''</font>) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_4Font7metrics metrics] ($char) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_4Font4blit blit] ([API_6Bitmap Bitmap] $dest, $text, $x, $y, $color) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_4Font5fixed $fixed]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_4Font5style $style]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_4Font6height $height]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_4Font6ascent $ascent]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_4Font7descent $descent]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_4Font8lineSkip $lineSkip]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_4Font8faceName $faceName]
+  * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_4Font9styleName $styleName]
 </font>

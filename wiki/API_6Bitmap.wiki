@@ -5,6 +5,7 @@ Class to handle, modify and draw images.
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap11__construct __construct] ($w, $h) : <font color="#a88">[API_6Bitmap Bitmap]</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Bitmap8fromFile fromFile] ($filename) : <font color="#a88">[API_6Bitmap Bitmap]</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Bitmap10fromString fromString] ($string) : <font color="#a88">[API_6Bitmap Bitmap]</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_6Bitmap8saveFile saveFile] ($filename, $format<font color="#999"> = 0</font>) : <font color="#a88">void</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap7__clone __clone] () : <font color="#a88">[API_6Bitmap Bitmap]</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5slice slice] ($x, $y, $w, $h) : <font color="#a88">[API_6Bitmap Bitmap]</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_6Bitmap5split split] ($w, $h) : <font color="#a88">Array</font>
@@ -16,4 +17,7 @@ Class to handle, modify and draw images.
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Bitmap1h $h]
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Bitmap2cx $cx]
   * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_6Bitmap2cy $cy]
+  * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_6Bitmap10FORMAT_BMP FORMAT_BMP] = <font color="#a88">0</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_6Bitmap10FORMAT_TGA FORMAT_TGA] = <font color="#a88">1</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_6Bitmap10FORMAT_PNG FORMAT_PNG] = <font color="#a88">2</font>
 </font>

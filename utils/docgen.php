@@ -1,7 +1,7 @@
 <?php
 	define('ROOT', str_replace('\\', '/', dirname(dirname(__FILE__))));
 	
-	$path_php_api  = ROOT . '/trunk/api.php';
+	$path_php_api  = ROOT . '/trunk/src/api.php';
 	$path_wiki     = ROOT . '/wiki';
 	
 	if (!is_readable($path_wiki)) {
@@ -14,7 +14,7 @@
 
 	error_reporting(E_ALL | E_STRICT);
 	$classes = get_declared_classes();
-	require_once(ROOT . '/trunk/api.php');
+	require_once($path_php_api);
 	$classes = array_diff(get_declared_classes(), $classes);
 	
 	function mangle($path) {
