@@ -1,4 +1,4 @@
-#labels samples
+#labels samples,shaders,glsl
 [http://phpelegante.googlepages.com/mandelbrot.jpg]
 
 {{{
@@ -16,7 +16,7 @@
 	// http://www.opengl.org/registry/doc/GLSLangSpec.Full.1.30.08.pdf
 	$shader_mandelbrot = new Shader("
 		varying vec3 position;
-		uniform float maxIterations;
+		uniform int maxIterations;
 		uniform vec2 center;
 		uniform vec4 outerColor1;
 		uniform vec4 outerColor2;
@@ -28,14 +28,14 @@
 			vec2 z0 = vec2(position) * (1.0 / zoom) + center;
 			vec2 z = z0;
 			
-			for (int iteration = 0; iteration < int(maxIterations); iteration++)
+			for (int iteration = 0; iteration < maxIterations; iteration++)
 			{
-				z = vec2((z.x * z.x - z.y * z.y + z0.x), (2.0 * z.x * z.y + z0.y));
+					z = vec2((z.x * z.x - z.y * z.y + z0.x), (2.0 * z.x * z.y + z0.y));
 
-				if (dot(z, z) >= 4.0) {
-					gl_FragColor = mix(outerColor1, outerColor2, float(iteration) / float(maxIterations));
-					return;
-				}
+					if (dot(z, z) >= 4.0) {
+							gl_FragColor = mix(outerColor1, outerColor2, float(iteration) / float(maxIterations));
+							return;
+					}
 			}
 			
 			gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
@@ -44,11 +44,13 @@
 		varying vec3 position;
 		void main()
 		{
-			position = vec3(gl_MultiTexCoord0 - 0.5) * 5.0;
+			position = vec3(gl_TextureMatrix[0] * gl_MultiTexCoord0 - 0.5) * 5.0;
 			position.x *= (float({$screen->w}) / float({$screen->h}));
 			gl_Position = ftransform();
 		}
 	");
+	
+	print_r($shader_mandelbrot->params);
 
 	// Initial values.
 	$zoom = 2.2;
@@ -89,13 +91,17 @@
 		echo "{$info}\t\r";
 
 		// Blits the mandelbrot on the screen.
-		$out->blit($screen, 0, 0, 1, 0, 1, $shader_mandelbrot, array(
+		$shader_mandelbrot->begin(array(
 			'maxIterations' => $maxIterations,
 			'center'        => array($center_x, $center_y),
 			'outerColor1'   => array(1, 1, 1, 0),
 			'outerColor2'   => array(1, 1, 1, 1),
 			'zoom'          => $zoom,
 		));
+		{
+			$out->blit($screen, 0, 0, 1, 0, 1);
+		}
+		$shader_mandelbrot->end();
 
 		// Input reading. Buffer swap. Clearning new screen.
 		Screen::frame();
