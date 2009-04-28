@@ -23,8 +23,7 @@ PHP_METHOD(Font, fromFile)
 	FontStruct *object;
 	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s|ll", &name, &name_len, &size, &index) == FAILURE) RETURN_FALSE;
 
-	//ObjectInit(ClassEntry_Font, return_value, TSRMLS_C);
-	ObjectInit(EG(called_scope), return_value, TSRMLS_C);
+	ObjectInit(EG(called_scope), return_value, TSRMLS_C); // Late Static Binding
 	object = zend_object_store_get_object(return_value, TSRMLS_C);	
 
 	object->font = TTF_OpenFontIndexRW(SDL_RWFromFile(name, "r"), 1, size, index);
@@ -61,7 +60,7 @@ PHP_METHOD(Font, __get)
 	if (strcmp(key, "height"   ) == 0) RETURN_LONG(TTF_FontHeight(font->font));
 	if (strcmp(key, "ascent"   ) == 0) RETURN_LONG(TTF_FontAscent(font->font));
 	if (strcmp(key, "descent"  ) == 0) RETURN_LONG(TTF_FontDescent(font->font));
-	if (strcmp(key, "likeSkip" ) == 0) RETURN_LONG(TTF_FontLineSkip(font->font));
+	if (strcmp(key, "lineSkip" ) == 0) RETURN_LONG(TTF_FontLineSkip(font->font));
 	if (strcmp(key, "faceName" ) == 0) RETURN_STRING(TTF_FontFaceFamilyName(font->font), 1);
 	if (strcmp(key, "styleName") == 0) RETURN_STRING(TTF_FontFaceStyleName(font->font), 1);
 	

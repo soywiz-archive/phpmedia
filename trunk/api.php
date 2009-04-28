@@ -16,6 +16,7 @@ final class Screen {
 	 * @param int $w Width of the window to create.
 	 * @param int $h Height of the window to create.
 	 * @param boolean $fullscreen Determines wether to create a fullscreen windows or not.
+	 *
 	 * @return Bitmap
 	 */
 	static public function init($w = 640, $h = 480, $fullscreen = false) { } // Bitmap $screen
@@ -27,6 +28,10 @@ final class Screen {
 
 	/**
 	 * Set or retrieves the title of the window.
+	 *
+	 * @param string $title If passed, changes the title of the window.
+	 *
+	 * @return Bitmap
 	 */
 	static public function title($title = null) { }
 }
@@ -35,7 +40,7 @@ final class Screen {
  * Channel class
  *
  */
-final class Channel {
+class Channel {
 	const FREE = -1;
 
 	public $playing;
@@ -67,7 +72,7 @@ final class Channel {
  * Sound class
  *
  */
-final class Sound {
+class Sound {
 	static public function fromFile($file) { }
 	static public function fromString($data) { }
 	public function slice($start = 0, $length = NULL) { }
@@ -78,7 +83,7 @@ final class Sound {
  * SoundEffect class
  *
  */
-final class SoundEffect {
+class SoundEffect {
 }
 
 /**
@@ -125,7 +130,7 @@ final class Audio {
 /**
  * Class to handle, modify and draw images.
  */
-final class Bitmap {
+class Bitmap {
 	//public $parent;
 	public $x, $y;
 	public $w, $h;
@@ -218,7 +223,9 @@ final class Bitmap {
 /**
  * Class to specify programs to execute for each pixel.
  */
-final class Shader {
+class Shader {
+	public $params;
+
 	public function __construct($shader_fragment = NULL, $shader_vertex = NULL) { }
 	public function begin($shader_params) { }
 	public function end() { }
@@ -263,10 +270,24 @@ final class Mouse {
 /**
  * Class to draw texts on bitmaps.
  */
-final class Font {
-	static public function fromFile($filename, $size) { }
+class Font {
+	public $fixed;
+	public $style; // read/write
+	public $height;
+	public $ascent;
+	public $descent;
+	public $lineSkip;
+	public $faceName;
+	public $styleName;
+
+	static public function fromFile($filename, $size = 16, $index = 0) { }
+	static public function fromString($filename, $size = 16, $index = 0) { }
+
+	public function width($text) { }
+	public function height($text = '') { }
+	public function metrics($char) { }
 	
-	public function render($text, $x, $y) { } // Bitmap
+	public function blit(Bitmap $dest, $text, $x, $y, $color) { }
 }
 
 /**

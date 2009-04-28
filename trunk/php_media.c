@@ -105,6 +105,7 @@ PM_METHODS(Math)
 PM_METHODS(Shader)
 {
 	PHP_ME_AI(Shader, __construct, ZEND_ACC_CTOR | ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Shader, __get      , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Shader, begin      , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Shader, end        , ZEND_ACC_PUBLIC)
 	PHP_ME_END
