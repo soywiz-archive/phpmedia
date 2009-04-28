@@ -221,15 +221,28 @@ FontGlyphCache *glyph_get(FontStruct *font, Uint16 ch) {
 		TTF_GlyphMetrics(font->font, ch, &minx, &maxx, &miny, &maxy, &advance);
 		x = minx;
 		y = TTF_FontAscent(font->font) - maxy;
+		
+		glMatrixMode(GL_TEXTURE);
+		glLoadIdentity();
+		glScaled(1.0 / (double)w, 1.0 / (double)h, 1.0);
+
+		glMatrixMode(GL_MODELVIEW);
 
 		glBindTexture(GL_TEXTURE_2D, g->gltex);
 		glEnable(GL_TEXTURE_2D);
 
 		glBegin(GL_QUADS);
-			glTexCoord2f(0.0f, 0.0f); glVertex2i(x + 0, y + 0);
-			glTexCoord2f(1.0f, 0.0f); glVertex2i(x + w, y + 0);
-			glTexCoord2f(1.0f, 1.0f); glVertex2i(x + w, y + h);
-			glTexCoord2f(0.0f, 1.0f); glVertex2i(x + 0, y + h);
+			if (1) {
+				glTexCoord2f((float)0, (float)0); glVertex2i(x + 0, y + 0);
+				glTexCoord2f((float)w, (float)0); glVertex2i(x + w, y + 0);
+				glTexCoord2f((float)w, (float)h); glVertex2i(x + w, y + h);
+				glTexCoord2f((float)0, (float)h); glVertex2i(x + 0, y + h);
+			} else {
+				glTexCoord2f(0, 0); glVertex2i(x + 0, y + 0);
+				glTexCoord2f(1, 0); glVertex2i(x + w, y + 0);
+				glTexCoord2f(1, 1); glVertex2i(x + w, y + h);
+				glTexCoord2f(0, 1); glVertex2i(x + 0, y + h);
+			}
 		glEnd();
 		glTranslatef((float)advance, 0.0, 0.0);
 	}
@@ -251,6 +264,8 @@ PHP_METHOD(Font, blit)
 	Uint16 ch = 0;
 	THIS_FONT;
 	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Os|dd", &object_bitmap, ClassEntry_Bitmap, &str, &str_len, &x, &y) == FAILURE) RETURN_FALSE;
+	
+	//glMatrixMode(GL_TEXTURE); glPushMatrix();
 
 	glLoadIdentity();
 	glTranslated(x, y, 0.0);
@@ -259,4 +274,6 @@ PHP_METHOD(Font, blit)
 		g = glyph_get(font, ch);
 		glCallList(g->list);
 	}
+
+	//glMatrixMode(GL_TEXTURE); glPopMatrix();
 }
