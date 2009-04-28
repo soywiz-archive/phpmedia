@@ -224,6 +224,7 @@ FontGlyphCache *glyph_get(FontStruct *font, Uint16 ch) {
 
 		glBindTexture(GL_TEXTURE_2D, g->gltex);
 		glEnable(GL_TEXTURE_2D);
+
 		glBegin(GL_QUADS);
 			glTexCoord2f(0.0f, 0.0f); glVertex2i(x + 0, y + 0);
 			glTexCoord2f(1.0f, 0.0f); glVertex2i(x + w, y + 0);

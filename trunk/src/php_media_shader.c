@@ -19,7 +19,9 @@ typedef struct {
 	ShaderStruct *shader;
 } ShaderEntry;
 
-ShaderEntry shader_stack[128]; int shader_stack_pos = 0;
+#define MAX_SHADER_STACK 128
+
+ShaderEntry shader_stack[MAX_SHADER_STACK]; int shader_stack_pos = 0;
 BitmapStruct *shader_bitmaps[16]; int shader_bitmaps_count = 1;
 
 
@@ -144,10 +146,14 @@ void shader_set(ShaderStruct *shader, zval *shader_params, TSRMLS_D) {
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glDisable(GL_TEXTURE_2D);
 		}
+		glActiveTexture(GL_TEXTURE0);
 	}
 }
 
 void shader_begin(ShaderStruct *shader, zval *array, TSRMLS_D) {
+	if (shader_stack_pos >= MAX_SHADER_STACK) {
+		THROWF("Shader stack limit!! Maybe any Shader::begin without Shader::end?");
+	}
 	shader_stack[shader_stack_pos].shader = shader;
 	shader_stack[shader_stack_pos].array = array;
 	shader_stack_pos++;
