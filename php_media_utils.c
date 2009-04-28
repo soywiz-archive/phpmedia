@@ -76,6 +76,7 @@ PFNGLUNIFORM4IVPROC                glUniform4iv                = NULL;
 
 PFNGLACTIVETEXTUREPROC             glActiveTexture             = NULL;
 PFNGLMULTITEXCOORD2DPROC           glMultiTexCoord2d           = NULL;
+PFNGLGETPROGRAMIVPROC              glGetProgramiv              = NULL;
 
 #define GL_LOAD_FUNC(name) name = SDL_GL_GetProcAddress(#name)
 
@@ -108,6 +109,7 @@ void glInitExsts() {
 
 	GL_LOAD_FUNC(glActiveTexture);
 	GL_LOAD_FUNC(glMultiTexCoord2d);
+	GL_LOAD_FUNC(glGetProgramiv);
 }
 
 

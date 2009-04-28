@@ -32,7 +32,8 @@ void shader_set(ShaderStruct *shader, zval *shader_params, TSRMLS_D) {
 		char *key; int key_len;
 		GLuint uni_id;
 		GLenum uni_type;
-		int dummy, n;
+		int n;
+		char temp[256]; int temp_len, uni_len;
 		double values_d[16];
 		float  values_f[16];
 		int    values_i[16];
@@ -61,7 +62,7 @@ void shader_set(ShaderStruct *shader, zval *shader_params, TSRMLS_D) {
 					continue;
 				}
 
-				glGetActiveUniform(shader->program, uni_id, 0, NULL, &dummy, &uni_type, NULL);
+				glGetActiveUniform(shader->program, uni_id, sizeof(temp), &temp_len, &uni_len, &uni_type, temp);
 				//printf("%s: %d\n", key, uni_type);
 				
 				switch (Z_TYPE(**element)) {
@@ -240,4 +241,32 @@ PHP_METHOD(Shader, end)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "") == FAILURE) RETURN_FALSE;
 	shader_end(TSRMLS_C);
+}
+
+// Shader::__get()
+PHP_METHOD_ARGS(Shader, __get) ARG_INFO(params) ZEND_END_ARG_INFO()
+PHP_METHOD(Shader, __get)
+{
+	zval *array;
+	char temp[256]; int temp_len = 0;
+	char *key; int key_l;
+	int n, count;
+	int uni_type; int uni_len;
+	THIS_SHADER;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &key, &key_l) == FAILURE) RETURN_FALSE;
+
+	if (strcmp(key, "params") == 0) {
+		MAKE_STD_ZVAL(array);
+		array_init(array);
+		
+		glGetProgramiv(shader->program, GL_ACTIVE_UNIFORMS, &count);
+		for (n = 0; n < count; n++) {
+			glGetActiveUniform(shader->program, n, sizeof(temp), &temp_len, &uni_len, &uni_type, temp);
+			add_assoc_long(array, temp, 0);
+		}
+
+		RETURN_ZVAL(array, 0, 1);
+	}
+	
+	RETURN_FALSE;
 }
