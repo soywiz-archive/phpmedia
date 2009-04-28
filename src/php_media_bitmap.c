@@ -207,6 +207,18 @@ PHP_METHOD(Bitmap, fromString)
 	if (!Bitmap_fromRW(&return_value, SDL_RWFromConstMem(data, data_len), TSRMLS_C)) THROWF("Can't load image from string");
 }
 
+// Bitmap::saveFile($name, $format = 0)
+PHP_METHOD_ARGS(Bitmap, saveFile) ARG_INFO(name) ARG_INFO(format) ZEND_END_ARG_INFO()
+PHP_METHOD(Bitmap, saveFile)
+{
+	char *name;
+	int name_len;
+	int format = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s|l", &name, &name_len, &format) == FAILURE) RETURN_FALSE;
+	//glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid * img);
+}
+
 // Bitmap::clear($r = 0, $g = 0, $b = 0, $a = 0)
 PHP_METHOD_ARGS(Bitmap, clear) ZEND_END_ARG_INFO()
 PHP_METHOD(Bitmap, clear)

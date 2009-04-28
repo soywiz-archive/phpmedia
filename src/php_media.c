@@ -42,13 +42,14 @@ PM_METHODS(Bitmap)
 	PHP_ME_AI(Bitmap, __construct, ZEND_ACC_CTOR | ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, __set      , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, __get      , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Bitmap, fromFile   , ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Bitmap, fromString , ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, center     , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, clear      , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, blit       , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, slice      , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Bitmap, split      , ZEND_ACC_PUBLIC)
-	PHP_ME_AI(Bitmap, fromFile   , ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_AI(Bitmap, fromString , ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_AI(Bitmap, saveFile   , ZEND_ACC_PUBLIC)
 	PHP_ME_END
 };
 
@@ -129,6 +130,10 @@ static void register_classes(TSRMLS_D)
 
 		PM_HANDLERS_INIT(Handlers_Bitmap);
 		PM_HANDLERS_ADD(clone_obj, Bitmap__ObjectClone);
+		
+		CLASS_REGISTER_CONSTANT_INT("FORMAT_BMP", 0);
+		CLASS_REGISTER_CONSTANT_INT("FORMAT_TGA", 1);
+		CLASS_REGISTER_CONSTANT_INT("FORMAT_PNG", 2);
 	}
 	
 	{ // Shader

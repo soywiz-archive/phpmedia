@@ -265,16 +265,25 @@ SDL_Surface *__SDL_CreateRGBSurfaceForOpenGL(int w, int h) {
 	return i;
 }
 
+SDL_Surface *__SDL_ConvertSurfaceForOpenGL(SDL_Surface *src, int freesrc) {
+	SDL_Surface *dst = NULL;
+	if (src == NULL) return NULL;
+	dst = __SDL_CreateRGBSurfaceForOpenGL(src->w, src->h);
+	if (dst) {
+		SDL_SetAlpha(src, 0, SDL_ALPHA_OPAQUE);
+		SDL_BlitSurface(src, 0, dst, 0);
+	}
+	if (freesrc) SDL_FreeSurface(src);
+	return dst;
+}
+
 void BitmapPrepare(BitmapStruct *bitmap) {
 	SDL_Surface *surfaceogl = NULL;
 	if (bitmap->gltex != 0) return;
-	if (!(surfaceogl = __SDL_CreateRGBSurfaceForOpenGL(bitmap->surface->w, bitmap->surface->h))) return;
+	if (!(surfaceogl = __SDL_ConvertSurfaceForOpenGL(bitmap->surface, 0))) return;
 
 	glGenTextures(1, &bitmap->gltex);
 	glBindTexture(GL_TEXTURE_2D, bitmap->gltex);
-
-	SDL_SetAlpha(bitmap->surface, 0, SDL_ALPHA_OPAQUE);
-	SDL_BlitSurface(bitmap->surface, 0, surfaceogl, 0);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, surfaceogl->w, surfaceogl->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surfaceogl->pixels);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
