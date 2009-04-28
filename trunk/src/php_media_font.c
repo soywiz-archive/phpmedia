@@ -256,24 +256,39 @@ PHP_METHOD_ARGS(Font, blit) ARG_INFO(text) ZEND_END_ARG_INFO()
 PHP_METHOD(Font, blit)
 {
 	zval *object_bitmap = NULL;
+	zval *color_array = NULL;
 	char *str = NULL; int str_len = 0;
 	int ptr_pos = 0; int ptr_inc = 0;
 	double x = 0.0, y = 0.0;
-	SDL_Color color = {0xFF, 0xFF, 0xFF};
+	double color[4] = {1, 1, 1, 1};
 	FontGlyphCache *g;
 	Uint16 ch = 0;
 	THIS_FONT;
-	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Os|dd", &object_bitmap, ClassEntry_Bitmap, &str, &str_len, &x, &y) == FAILURE) RETURN_FALSE;
+	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Os|dda", &object_bitmap, ClassEntry_Bitmap, &str, &str_len, &x, &y, &color_array) == FAILURE) RETURN_FALSE;
 	
-	//glMatrixMode(GL_TEXTURE); glPushMatrix();
-
-	glLoadIdentity();
-	glTranslated(x, y, 0.0);
-	while (ptr_pos < str_len) {
-		ch = utf8_decode(&str[ptr_pos], &ptr_inc); ptr_pos += ptr_inc;
-		g = glyph_get(font, ch);
-		glCallList(g->list);
+	if (color_array) {
+		int n = 0;
+		HashTable *ht = Z_ARRVAL_P(color_array);
+	
+		for (n = 0; n < 4; n++) {
+			zval **v = NULL;
+			if (0 == zend_hash_index_find(ht, n, (void **)&v)) { convert_to_double(*v); color[n] = Z_DVAL_PP(v); }
+		}
 	}
+
+	glPushAttrib(GL_CURRENT_BIT);
+	{
+		glColor4dv(color);
+
+		glLoadIdentity();
+		glTranslated(x, y, 0.0);
+		while (ptr_pos < str_len) {
+			ch = utf8_decode(&str[ptr_pos], &ptr_inc); ptr_pos += ptr_inc;
+			g = glyph_get(font, ch);
+			glCallList(g->list);
+		}
+	}
+	glPopAttrib();
 
 	//glMatrixMode(GL_TEXTURE); glPopMatrix();
 }
