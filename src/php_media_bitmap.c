@@ -305,6 +305,7 @@ PHP_METHOD(Bitmap, blit)
 	}
 
 	for (n = 0; n < shader_bitmaps_count; n++) {
+		/*
 		tx[n][0] = (double)(shader_bitmaps[n]->x + 0                   ) / (double)shader_bitmaps[n]->surface->w;
 		tx[n][1] = (double)(shader_bitmaps[n]->x + shader_bitmaps[n]->w) / (double)shader_bitmaps[n]->surface->w;
 		ty[n][0] = (double)(shader_bitmaps[n]->y + 0                   ) / (double)shader_bitmaps[n]->surface->h;
@@ -314,9 +315,19 @@ PHP_METHOD(Bitmap, blit)
 		tx[n][1] *= (double)shader_bitmaps[0]->w / (double)shader_bitmaps[n]->w;
 		ty[n][0] *= (double)shader_bitmaps[0]->h / (double)shader_bitmaps[n]->h;
 		ty[n][1] *= (double)shader_bitmaps[0]->h / (double)shader_bitmaps[n]->h;
-		
-		//printf("(%f, %f)-(%f, %f)\n", (float)tx[n][0], (float)ty[n][0], (float)tx[n][1], (float)ty[n][1]);
+		*/
+		tx[n][0] = (double)(shader_bitmaps[n]->x + 0                   );
+		tx[n][1] = (double)(shader_bitmaps[n]->x + shader_bitmaps[n]->w);
+		ty[n][0] = (double)(shader_bitmaps[n]->y + 0                   );
+		ty[n][1] = (double)(shader_bitmaps[n]->y + shader_bitmaps[n]->h);
+
+		glActiveTexture(GL_TEXTURE0 + n);
+		glMatrixMode(GL_TEXTURE);
+		glLoadIdentity();
+		glScaled(1.0 / (double)shader_bitmaps[n]->surface->w, 1.0 / (double)shader_bitmaps[n]->surface->h, 1.0);
 	}
+	
+	glActiveTexture(GL_TEXTURE0);
 	
 	w  = source->w;
 	h  = source->h;
@@ -327,6 +338,8 @@ PHP_METHOD(Bitmap, blit)
 		for (n = 0; n < shader_bitmaps_count; n++) glMultiTexCoord2d(GL_TEXTURE0 + n, tx[n][X], ty[n][Y]); \
 		glVertex2d((X * w) - cx, (Y * h) - cy); \
 	}
+
+	glMatrixMode(GL_MODELVIEW);
 		
 	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_POLYGON);
