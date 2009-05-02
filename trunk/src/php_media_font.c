@@ -54,21 +54,79 @@ PHP_METHOD(Font, fromFile)
 	
 #ifdef WIN32
 	if (rw == NULL) {
-		char *windir;
-
-		windir = getenv("SystemRoot");
-		if (windir == NULL) windir = getenv("windir");
-		if (windir && name) {
-			sprintf(temp, "%s\\Fonts\\%s", windir, name);
-			rw = SDL_RWFromFile(temp, "r");
-		}
+		temp[0] = 0;
+		SHGetSpecialFolderPath(NULL, temp, CSIDL_FONTS, 0);
+		strcat(temp, "\\");
+		strcat(temp, name);
+		rw = SDL_RWFromFile(temp, "r");
 	}
 #endif
 	
 	if (rw != NULL) object->font = TTF_OpenFontIndexRW(rw, 1, size, index);
 
 	if (object->font == NULL) {
-		THROWF("Can't load from from file('%s') with size(%d)", name, size);
+		THROWF("Can't load font from file('%s') with size(%d)", name, size);
+	}
+}
+
+SDL_RWops *TryOpenFontTTF(char *name) {
+	HKEY key;
+	LONG type;
+	char temp[0x200], ttf_name[128];
+	int len = sizeof(ttf_name);
+	temp[0] = ttf_name[0] = 0;
+	RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", 0, KEY_ENUMERATE_SUB_KEYS | KEY_READ, &key);
+	sprintf(temp, "%s (TrueType)", name);
+	RegQueryValueEx(key, temp, 0, &type, ttf_name, &len);
+
+	temp[0] = 0;
+	SHGetSpecialFolderPath(NULL, temp, CSIDL_FONTS, 0);
+	strcat(temp, "\\");
+	strcat(temp, ttf_name);
+	return SDL_RWFromFile(temp, "r");
+}
+
+// Font::fromName($name, $size = 16, $index = 0)
+PHP_METHOD_ARGS(Font, fromName) ARG_INFO(name) ARG_INFO(size) ARG_INFO(index) ZEND_END_ARG_INFO()
+PHP_METHOD(Font, fromName)
+{
+	char temp[0x200]; char *temp_start, *temp_end;
+	char *name = NULL; int name_len = 0; int size = 16, index = 0;
+	SDL_RWops *rw = NULL;
+	FontStruct *object = NULL;
+	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s|ll", &name, &name_len, &size, &index) == FAILURE) RETURN_FALSE;
+
+	ObjectInit(EG(called_scope), return_value, TSRMLS_C); // Late Static Binding
+	object = zend_object_store_get_object(return_value, TSRMLS_C);	
+	object->font = NULL;
+	
+	sprintf(temp, "%s", name);
+	temp_start = temp;
+	
+#ifdef WIN32
+	while (1) {
+		temp_end = strchr(temp_start, ',');
+		if (temp_end) {
+			int n;
+			temp_end[0] = '\0';
+			for (n = -1; isspace(temp_end[n]); n--) temp_end[n] = '\0';
+		}
+		while (isspace(*temp_start)) temp_start++;
+		
+		// Found!
+		if ((rw = TryOpenFontTTF(temp_start)) != NULL) break;
+
+		if (temp_end == NULL) break;
+		temp_start = temp_end + 1;
+	}
+#else
+	THROWF("Only implemented in windows.")
+#endif
+	
+	if (rw != NULL) object->font = TTF_OpenFontIndexRW(rw, 1, size, index);
+
+	if (object->font == NULL) {
+		THROWF("Can't load font '%s' with size(%d)", name, size);
 	}
 }
 

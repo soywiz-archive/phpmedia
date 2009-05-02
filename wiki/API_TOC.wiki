@@ -63,6 +63,7 @@
   * [http://phpmedia.googlecode.com/svn/www/icons/class.png][API_4Font Font]
     * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Font8fromFile fromFile]
     * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Font10fromString fromString]
+    * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Font8fromName fromName]
     * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_4Font5width width]
     * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_4Font6height height]
     * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_4Font7metrics metrics]
