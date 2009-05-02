@@ -35,20 +35,37 @@ PM_OBJECTCLONE(Font);
 
 void FontCheckInit() { if (!TTF_WasInit()) TTF_Init(); }
 
+char temp[0x800];
+
 // Font::fromFile($file, $size = 16, $index = 0)
 PHP_METHOD_ARGS(Font, fromFile) ARG_INFO(file) ARG_INFO(size) ARG_INFO(index) ZEND_END_ARG_INFO()
 PHP_METHOD(Font, fromFile)
 {
 	char *name = NULL; int name_len = 0; int size = 16, index = 0;
-	SDL_RWops *rw;
-	FontStruct *object;
+	SDL_RWops *rw = NULL;
+	FontStruct *object = NULL;
 	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s|ll", &name, &name_len, &size, &index) == FAILURE) RETURN_FALSE;
 
 	ObjectInit(EG(called_scope), return_value, TSRMLS_C); // Late Static Binding
 	object = zend_object_store_get_object(return_value, TSRMLS_C);	
 	object->font = NULL;
+	
+	rw = SDL_RWFromFile(name, "r");
+	
+#ifdef WIN32
+	if (rw == NULL) {
+		char *windir;
 
-	if (rw = SDL_RWFromFile(name, "r")) object->font = TTF_OpenFontIndexRW(rw, 1, size, index);
+		windir = getenv("SystemRoot");
+		if (windir == NULL) windir = getenv("windir");
+		if (windir && name) {
+			sprintf(temp, "%s\\Fonts\\%s", windir, name);
+			rw = SDL_RWFromFile(temp, "r");
+		}
+	}
+#endif
+	
+	if (rw != NULL) object->font = TTF_OpenFontIndexRW(rw, 1, size, index);
 
 	if (object->font == NULL) {
 		THROWF("Can't load from from file('%s') with size(%d)", name, size);
@@ -61,13 +78,25 @@ PHP_METHOD(Font, fromString)
 {
 }
 
-// Font::width($text = '')
-PHP_METHOD_ARGS(Font, width) ARG_INFO(text) ZEND_END_ARG_INFO()
+// Font::width($str)
+PHP_METHOD_ARGS(Font, width) ARG_INFO(str) ZEND_END_ARG_INFO()
 PHP_METHOD(Font, width)
 {
-	char *text = NULL; int text_len = 0;
+	Uint16 ch = 0;
+	int minx, miny, maxx, maxy, advance, x, y, ptr_pos = 0, ptr_inc = 0, width = 0;
+	char *str = NULL; int str_len = 0;
 	THIS_FONT;
-	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "|s", &text, &text_len) == FAILURE) RETURN_FALSE;
+	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &str, &str_len) == FAILURE) RETURN_FALSE;
+
+	while (ptr_pos < str_len) {
+		ch = utf8_decode(&str[ptr_pos], &ptr_inc); ptr_pos += ptr_inc;
+		TTF_GlyphMetrics(font->font, ch, &minx, &maxx, &miny, &maxy, &advance);
+		x = minx;
+		y = TTF_FontAscent(font->font) - maxy;
+		width += advance;
+	}
+
+	RETURN_LONG(width);
 }
 
 // Font::__get($key)
@@ -147,27 +176,10 @@ PHP_METHOD(Font, height)
 	RETURN_LONG(TTF_FontHeight(font->font) * lines);
 }
 
-/*
-typedef struct {
-	Uint16 ch;
-	Uint16 used;
-	GLuint gltex;
-	SDL_Surface *surface;
-} FontGlyphCache;
-
-typedef struct {
-	zend_object std;
-	TTF_Font *font;
-	FontGlyphCache[0x100] glyphs;
-} FontStruct;
-*/
-
-// void qsort(void *base, size_t nmemb, size_t tamanyo, int (*comparar)(const void *, const void *));
-
 int sort_glyph_usage(const void *_a, const void *_b) {
 	FontGlyphCache *a = (FontGlyphCache *)_a, *b = (FontGlyphCache *)_b;
-	if (a->ch == 0) return 1;
-	if (b->ch == 0) return -1;
+	if (a->ch == 0) return -1;
+	if (b->ch == 0) return +1;
 	return (int)(a->used) - (int)(b->used);
 }
 
@@ -178,7 +190,7 @@ FontGlyphCache *glyph_get(FontStruct *font, Uint16 ch) {
 	FontGlyphCache *g = NULL;
 	SDL_Color color = {0xFF, 0xFF, 0xFF, 0xFF};
 	qsort(font->glyphs, GLYPH_MAX_CACHE, sizeof(FontGlyphCache), sort_glyph_usage);
-	
+
 	// Try to locate an already cached glyph
 	for (n = 0; n < GLYPH_MAX_CACHE; n++) {
 		g = &font->glyphs[n];
@@ -188,8 +200,9 @@ FontGlyphCache *glyph_get(FontStruct *font, Uint16 ch) {
 		}
 		if (g->ch == 0) break;
 	}
+
 	glyph_free(g);
-	g->ch = 0;
+	g->ch = ch;
 	g->used = 1;
 	g->surface = TTF_RenderGlyph_Blended(font->font, ch, color);
 	g->list = glGenLists(1);

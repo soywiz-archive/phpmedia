@@ -4,4 +4,12 @@ Class to control mouse operations.
 <font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Mouse4show show] () : <font color="#a88">void</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Mouse4hide hide] () : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Mouse8position position] ($x<font color="#999"> = NULL</font>, $y<font color="#999"> = NULL</font>) : <font color="#a88">array</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Mouse7pressed pressed] ($but) : <font color="#a88">bool</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_5Mouse4down down] ($but) : <font color="#a88">bool</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_5Mouse4LEFT LEFT] = <font color="#a88">1</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_5Mouse6MIDDLE MIDDLE] = <font color="#a88">2</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_5Mouse5RIGHT RIGHT] = <font color="#a88">3</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_5Mouse8WHEEL_UP WHEEL_UP] = <font color="#a88">4</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_5Mouse10WHEEL_DOWN WHEEL_DOWN] = <font color="#a88">5</font>
 </font>

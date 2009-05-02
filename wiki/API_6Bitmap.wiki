@@ -20,4 +20,5 @@ Class to handle, modify and draw images.
   * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_6Bitmap10FORMAT_BMP FORMAT_BMP] = <font color="#a88">0</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_6Bitmap10FORMAT_TGA FORMAT_TGA] = <font color="#a88">1</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_6Bitmap10FORMAT_PNG FORMAT_PNG] = <font color="#a88">2</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/constant.png][API_6Bitmap10FORMAT_JPG FORMAT_JPG] = <font color="#a88">3</font>
 </font>

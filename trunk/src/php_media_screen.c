@@ -99,23 +99,30 @@ PHP_METHOD_ARGS(Screen, frame) ZEND_END_ARG_INFO()
 PHP_METHOD(Screen, frame)
 {
 	SDL_Event event;
+	int k, v;
 	static unsigned int ticks = 0;
 
 	memset(keys_pressed, 0, sizeof(keys_pressed));
+	memset(mouse_pressed, 0, sizeof(mouse_pressed));
 
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 			case SDL_QUIT:
 				exit(0);
 			break;
-			case SDL_KEYDOWN:
-				keys_pressed[event.key.keysym.sym] = 1;
-				keys_status[event.key.keysym.sym] = 1;
-			break;
-			case SDL_KEYUP:
-				keys_pressed[event.key.keysym.sym] = 0;
-				keys_status[event.key.keysym.sym] = 0;
-			break;
+			case SDL_KEYUP: case SDL_KEYDOWN: {
+				v = (event.key.type == SDL_KEYDOWN);
+				k = event.key.keysym.sym;
+				keys_status [k]  = v;
+				keys_pressed[k] |= v;
+			} break;
+			case SDL_MOUSEBUTTONUP: case SDL_MOUSEBUTTONDOWN: {
+				v = (event.button.type == SDL_MOUSEBUTTONDOWN);
+				k = event.button.button;
+				// SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT, SDL_BUTTON_WHEELUP, SDL_BUTTON_WHEELDOW
+				mouse_status [k]  = v;
+				mouse_pressed[k] |= v;
+			} break;
 			case SDL_MOUSEMOTION:
 			break;
 			default:
