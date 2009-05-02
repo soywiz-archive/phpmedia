@@ -134,6 +134,7 @@ class Bitmap {
 	const FORMAT_BMP = 0;
 	const FORMAT_TGA = 1;
 	const FORMAT_PNG = 2;
+	const FORMAT_JPG = 3;
 
 	//public $parent;
 	public $x, $y;
@@ -235,10 +236,24 @@ class Bitmap {
  * Class to specify programs to execute for each pixel.
  */
 class Shader {
-	public $params;
-
+	/**
+	 * Creates a shader.
+	 *
+	 * @param string  $shader_fragment Shader fragment unit.
+	 * @param string  $shader_vertex   Shader vertex unit.
+	 */
 	public function __construct($shader_fragment = NULL, $shader_vertex = NULL) { }
-	public function begin($shader_params) { }
+	
+	/**
+	 * Starts a shader program.
+	 *
+	 * @param array  $shader_params Parameters for the shader.
+	 */
+	public function begin($shader_params = array()) { }
+
+	/**
+	 * Ends a shader program.
+	 */
 	public function end() { }
 }
 
@@ -267,6 +282,12 @@ final class Keyboard {
  * Class to control mouse operations.
  */
 final class Mouse {
+	const LEFT       = 1;
+	const MIDDLE     = 2;
+	const RIGHT      = 3;
+	const WHEEL_UP   = 4;
+	const WHEEL_DOWN = 5;
+
 	/**
 	 * Shows the mouse cursor.
 	 */
@@ -276,6 +297,32 @@ final class Mouse {
 	 * Hide the mouse cursor.
 	 */
 	static public function hide() { }
+
+	/**
+	 * Gets or sets the mouse position.
+	 *
+	 * @param int $x Sets x position of the mouse cursor.
+	 * @param int $y Sets y position of the mouse cursor.
+	 *
+	 * @return array($x, $y)
+	 */
+	static public function position($x = NULL, $y = NULL) { }
+
+	/**
+	 * Returns if the button is currently pressed.
+	 *
+	 * @param int $but Button to check.
+	 * @return bool
+	 */
+	static public function pressed($but) { }
+
+	/**
+	 * Returns if the button is currently down.
+	 *
+	 * @param int $but Button to check.
+	 * @return bool
+	 */
+	static public function down($but) { }
 }
 
 /**

@@ -236,25 +236,31 @@ void __checkPow2() {
 	__texPow2 = 1;
 }
 
+void __SDL_PrepareTextureSize(int w, int h, int *rw, int *rh) {
+	//if (__texPow2 == 0) __checkPow2();
+	//if (__texRectangle == 0) __checkTexRectangle();
+	
+	*rw = w;
+	*rh = h;
+
+	if (__texPow2 > 0) {
+		*rw = __NextPowerOfTwo(w);
+		*rh = __NextPowerOfTwo(h);
+	} else {
+		*rw = w;
+		*rh = h;
+	}
+
+	if (__texRectangle > 0) {
+		if (*rw > *rh) *rh = *rw; else *rw = *rh;
+	}
+}
 
 SDL_Surface *__SDL_CreateRGBSurfaceForOpenGL(int w, int h) {
 	SDL_Surface *i;
 	int rw, rh;
-
-	//if (__texPow2 == 0) __checkPow2();
-	//if (__texRectangle == 0) __checkTexRectangle();
-
-	if (__texPow2 > 0) {
-		rw = __NextPowerOfTwo(w);
-		rh = __NextPowerOfTwo(h);
-	} else {
-		rw = w;
-		rh = h;
-	}
-
-	if (__texRectangle > 0) {
-		if (rw > rh) rh = rw; else rw = rh;
-	}
+	
+	__SDL_PrepareTextureSize(w, h, &rw, &rh);
 
 	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 		i = SDL_CreateRGBSurface(SDL_SWSURFACE, rw, rh, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);

@@ -43,7 +43,7 @@ typedef struct {
 	SDL_Surface *surface;
 } FontGlyphCache;
 
-#define GLYPH_MAX_CACHE 0x100
+#define GLYPH_MAX_CACHE 0x400
 typedef struct {
 	zend_object std;
 	TTF_Font *font;

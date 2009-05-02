@@ -211,12 +211,75 @@ PHP_METHOD(Bitmap, fromString)
 PHP_METHOD_ARGS(Bitmap, saveFile) ARG_INFO(name) ARG_INFO(format) ZEND_END_ARG_INFO()
 PHP_METHOD(Bitmap, saveFile)
 {
-	char *name;
-	int name_len;
+	char *name = NULL; int name_len = 0;
 	int format = 0;
+	SDL_Surface *temp = NULL;
+	int flip = 0;
+	THIS_BITMAP;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s|l", &name, &name_len, &format) == FAILURE) RETURN_FALSE;
-	//glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid * img);
+	
+
+	if (bitmap->surface == screen) {
+		temp = SDL_CreateRGBSurface(0, bitmap->surface->w, bitmap->surface->h, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+		SDL_LockSurface(temp);
+		{
+			glReadPixels(0, 0, screen->w, screen->h, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, temp->pixels);
+		}
+		SDL_UnlockSurface(temp);
+		flip = 1;
+	} else {
+		int rw = 0, rh = 0;
+		glBindTexture(GL_TEXTURE_2D, bitmap->gltex);
+
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH , &rw);
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &rh);
+
+		temp = SDL_CreateRGBSurface(0, rw, rh, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+		
+		SDL_LockSurface(temp);
+		{
+			glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, temp->pixels);
+		}
+		SDL_UnlockSurface(temp);
+	}
+
+	if (temp) {
+		if (flip) {
+			SDL_LockSurface(temp);
+			{
+				int n, width = temp->pitch, height = temp->h, height2 = temp->h >> 1;
+				char *row = malloc(width);
+				if (row) {
+					for (n = 0; n < height2; n++) {
+						char *row1 = (char *)temp->pixels + (n) * width;
+						char *row2 = (char *)temp->pixels + (height - n - 1) * width;
+						memcpy(row, row1, width);
+						memcpy(row1, row2, width);
+						memcpy(row2, row, width);
+					}
+					free(row);
+				}
+			}
+			SDL_UnlockSurface(temp);
+		}
+		switch (format) {
+			case 0: // BMP
+				SDL_SaveBMP(temp, name);
+				SDL_FreeSurface(temp);
+			break;
+			case 1: // TGA
+			case 2: // PNG
+			case 3: // TGA
+				SDL_FreeSurface(temp);
+				THROWF("Not supported format for Bitmap::saveFile");
+			break;
+			default:
+				SDL_FreeSurface(temp);
+				THROWF("Invalid format for Bitmap::saveFile");
+			break;
+		}
+	}
 }
 
 // Bitmap::clear($r = 0, $g = 0, $b = 0, $a = 0)
