@@ -141,20 +141,26 @@ PHP_METHOD_ARGS(Font, width) ARG_INFO(str) ZEND_END_ARG_INFO()
 PHP_METHOD(Font, width)
 {
 	Uint16 ch = 0;
-	int minx, miny, maxx, maxy, advance, x, y, ptr_pos = 0, ptr_inc = 0, width = 0;
+	int minx, miny, maxx, maxy, advance, x, y, ptr_pos = 0, ptr_inc = 0, width = 0, max_width = 0;
 	char *str = NULL; int str_len = 0;
 	THIS_FONT;
 	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &str, &str_len) == FAILURE) RETURN_FALSE;
 
 	while (ptr_pos < str_len) {
 		ch = utf8_decode(&str[ptr_pos], &ptr_inc); ptr_pos += ptr_inc;
+		if (ch == '\n') {
+			if (width > max_width) max_width = width;
+			width = 0;
+			continue;
+		}
 		TTF_GlyphMetrics(font->font, ch, &minx, &maxx, &miny, &maxy, &advance);
 		x = minx;
 		y = TTF_FontAscent(font->font) - maxy;
 		width += advance;
 	}
+	if (width > max_width) max_width = width;
 
-	RETURN_LONG(width);
+	RETURN_LONG(max_width);
 }
 
 // Font::__get($key)
@@ -236,9 +242,41 @@ PHP_METHOD(Font, height)
 
 int sort_glyph_usage(const void *_a, const void *_b) {
 	FontGlyphCache *a = (FontGlyphCache *)_a, *b = (FontGlyphCache *)_b;
-	if (a->ch == 0) return -1;
-	if (b->ch == 0) return +1;
-	return (int)(a->used) - (int)(b->used);
+	if (a->ch == 0) return +1;
+	if (b->ch == 0) return -1;
+	return (int)(b->used) - (int)(a->used);
+}
+
+int reduce_count = 0;
+
+void glyph_reduce(FontStruct *font) {
+	if (reduce_count++ <= 64000) return; else reduce_count = 0;
+	{
+		int n; FontGlyphCache *g;
+		int min = 0xFFFF;
+
+		for (n = 0; n < GLYPH_MAX_CACHE; n++) {
+			g = &font->glyphs[n];
+			//if (g->used == 0) continue;
+			if (g->used == 0) break;
+			if (g->used < min) min = g->used;
+		}
+		
+		min--;
+
+		//qsort(font->glyphs, GLYPH_MAX_CACHE, sizeof(FontGlyphCache), sort_glyph_usage);
+		qsort(font->glyphs, n, sizeof(FontGlyphCache), sort_glyph_usage);
+
+		//printf("{\n");
+		for (n = 0; n < GLYPH_MAX_CACHE; n++) {
+			g = &font->glyphs[n];
+			//if (g->used == 0) continue;
+			if (g->used == 0) break;
+			g->used -= min;
+			//printf("  %04X: %04X: %d\n", n, g->ch, g->used);
+		}
+		//printf("}");
+	}
 }
 
 FontGlyphCache *glyph_get(FontStruct *font, Uint16 ch) {
@@ -247,18 +285,21 @@ FontGlyphCache *glyph_get(FontStruct *font, Uint16 ch) {
 	SDL_Surface *surfaceogl = NULL;
 	FontGlyphCache *g = NULL;
 	SDL_Color color = {0xFF, 0xFF, 0xFF, 0xFF};
-	qsort(font->glyphs, GLYPH_MAX_CACHE, sizeof(FontGlyphCache), sort_glyph_usage);
+
+	glyph_reduce(font);
 
 	// Try to locate an already cached glyph
 	for (n = 0; n < GLYPH_MAX_CACHE; n++) {
 		g = &font->glyphs[n];
+		//if (g->ch != 0) printf("Check: (%d/%d)\n", ch, g->ch);
 		if (g->ch == ch) {
-			g->used++;
+			if (g->used < 0xFFFF - 1) g->used++;
 			return g;
 		}
 		if (g->ch == 0) break;
 	}
-
+	//printf("Not cached (%d)!\n", ch);
+	
 	glyph_free(g);
 	g->ch = ch;
 	g->used = 1;
@@ -318,7 +359,7 @@ FontGlyphCache *glyph_get(FontStruct *font, Uint16 ch) {
 		glTranslatef((float)advance, 0.0, 0.0);
 	}
 	glEndList();
-
+	
 	return g;
 }
 
@@ -334,6 +375,7 @@ PHP_METHOD(Font, blit)
 	double color[4] = {1, 1, 1, 1};
 	FontGlyphCache *g;
 	Uint16 ch = 0;
+	int line = 0;
 	THIS_FONT;
 	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Os|dda", &object_bitmap, ClassEntry_Bitmap, &str, &str_len, &x, &y, &color_array) == FAILURE) RETURN_FALSE;
 	
@@ -355,6 +397,11 @@ PHP_METHOD(Font, blit)
 		glTranslated(x, y, 0.0);
 		while (ptr_pos < str_len) {
 			ch = utf8_decode(&str[ptr_pos], &ptr_inc); ptr_pos += ptr_inc;
+			if (ch == '\n') {
+				glLoadIdentity();
+				glTranslated(x, y + ++line * TTF_FontHeight(font->font), 0.0);
+				continue;
+			}
 			g = glyph_get(font, ch);
 			glCallList(g->list);
 		}
