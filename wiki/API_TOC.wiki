@@ -77,3 +77,4 @@
     * [http://phpmedia.googlecode.com/svn/www/icons/field.png][API_4Font9styleName $styleName]
   * [http://phpmedia.googlecode.com/svn/www/icons/class.png][API_4Math Math]
     * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Math5clamp clamp]
+    * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Math10smoothstep smoothstep]

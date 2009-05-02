@@ -355,10 +355,19 @@ final class Math {
 	/**
 	 * Clamps a variable passed by reference by a minimum and maximum value.
 	 *
-	 * @param mixed &$var Variable to check and update.
 	 * @param mixed $min Minimum value.
 	 * @param mixed $max Maximum value.
+	 * @param mixed &$input Variable to check and update.
 	 */
-	static public function clamp(&$var, $min, $max) { }
+	static public function clamp($min, $max, &$input) { }
+
+	/**
+	 * The function will return a number between 0 and 1 that represents the relationship of the $input value to the $min and $max values. 
+	 *
+	 * @param mixed $min Minimum value.
+	 * @param mixed $max Maximum value.
+	 * @param mixed &$input Variable to check and update.
+	 */
+	static public function smoothstep($min, $max, &$input) { }
 }
 ?>
