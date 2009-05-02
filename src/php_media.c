@@ -1,5 +1,13 @@
 ﻿#include "php_media.h"
 
+#define CONFIG_TCCDIR "."
+#define GCC_MAJOR "3.2"
+#define HOST_I386 1
+#define TCC_TARGET_I386 1
+#define CONFIG_WIN32 1
+#define HAVE_GPROF 1
+#define TCC_VERSION "0.9.24"
+
 Mix_Music *music = NULL;
 SDL_Surface *screen;
 int keys_status[SDLK_LAST];
@@ -8,14 +16,13 @@ int mouse_status[0x10];
 int mouse_pressed[0x10];
 static char gl_error[0x800];
 
-static zend_object_handlers Handlers_Bitmap;
-static zend_object_handlers Handlers_Sound;
-static zend_object_handlers Handlers_Shader;
-static zend_object_handlers Handlers_Font;
-static zend_class_entry    *ClassEntry_Bitmap;
-static zend_class_entry    *ClassEntry_Sound;
-static zend_class_entry    *ClassEntry_Shader;
-static zend_class_entry    *ClassEntry_Font;
+#define CLASS_EXTRA_STRUCT(CLASS) static zend_object_handlers Handlers_##CLASS; static zend_class_entry *ClassEntry_##CLASS;
+
+CLASS_EXTRA_STRUCT(Bitmap);
+CLASS_EXTRA_STRUCT(Sound);
+CLASS_EXTRA_STRUCT(Shader);
+CLASS_EXTRA_STRUCT(Font);
+CLASS_EXTRA_STRUCT(TCC);
 
 #include "php_media_utils.c"
 #include "php_media_shader.c"
@@ -25,6 +32,7 @@ static zend_class_entry    *ClassEntry_Font;
 #include "php_media_audio.c"
 #include "php_media_font.c"
 #include "php_media_math.c"
+#include "php_media_tcc.c"
 
 PM_METHODS(Font)
 {
@@ -115,6 +123,30 @@ PM_METHODS(Shader)
 	PHP_ME_AI(Shader, __get      , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Shader, begin      , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(Shader, end        , ZEND_ACC_PUBLIC)
+	PHP_ME_END
+};
+
+PM_METHODS(External)
+{
+	/*
+	PHP_ME_AI(External, load  , ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(External, unload, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(External, call  , ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	*/
+	PHP_ME_END
+};
+
+PM_METHODS(TCC)
+{
+	PHP_ME_AI(TCC, __construct , ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+	PHP_ME_AI(TCC, define      , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(TCC, sourceString, ZEND_ACC_PUBLIC)
+	PHP_ME_AI(TCC, sourceFile  , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(TCC, libFile     , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(TCC, libPath     , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(TCC, includePath , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(TCC, runMain     , ZEND_ACC_PUBLIC)
+	PHP_ME_AI(TCC, call        , ZEND_ACC_PUBLIC)
 	PHP_ME_END
 };
 
@@ -254,6 +286,20 @@ static void register_classes(TSRMLS_D)
 	{ // Math
 		PM_CLASS_INIT(Math);
 		PM_CLASS_REGISTER();
+	}
+	
+	{ // External
+		PM_CLASS_INIT(External);
+		PM_CLASS_REGISTER();
+	}
+
+	{ // TCC
+		PM_CLASS_INIT(TCC);
+		PM_CLASS_ADD(create_object, TCC__ObjectNew)
+		PM_CLASS_REGISTER();
+		ClassEntry_TCC = CurrentClassEntry;
+		PM_HANDLERS_INIT(Handlers_TCC);
+		PM_HANDLERS_ADD(clone_obj, TCC__ObjectClone);
 	}
 }
 

@@ -12,6 +12,15 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 
+struct TCCState;
+typedef struct TCCState TCCState;
+
+typedef struct {
+	zend_object std;
+	TCCState *state;
+	int relocated;
+} TCCStruct;
+
 typedef struct _BitmapStruct {
 	zend_object std;
 	struct _BitmapStruct *parent;
@@ -65,6 +74,7 @@ typedef struct {
 #define THIS_SOUND     GET_THIS_TYPE(SoundStruct, sound);
 #define THIS_SHADER    GET_THIS_TYPE(ShaderStruct, shader);
 #define THIS_FONT      GET_THIS_TYPE(FontStruct, font);
+#define THIS_TCC       GET_THIS_TYPE(TCCStruct, tcc);
 
 #define PHP_ME_AI(CLASS, METHOD, ATT) PHP_ME(CLASS, METHOD, PHP_METHOD_NAME_ARGINFO(CLASS, METHOD), ATT)
 #define PHP_ME_END {NULL, NULL, NULL}
@@ -123,3 +133,6 @@ typedef struct {
 		PM_Clone_##TYPE(old_obj, new_obj); \
 		return new_ov; \
 	}
+	
+#define DEFINE_FUNC(RETVAL, NAME, ...) RETVAL (*NAME) (__VA_ARGS__) = NULL;
+#define LOAD_FUNC(name) name = (void *)GetProcAddress(lib, #name);
