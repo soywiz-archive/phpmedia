@@ -340,6 +340,7 @@ class Font {
 
 	static public function fromFile($filename, $size = 16, $index = 0) { }
 	static public function fromString($filename, $size = 16, $index = 0) { }
+	static public function fromName($names, $size = 16, $index = 0) { }
 
 	public function width($text) { }
 	public function height($text = '') { }

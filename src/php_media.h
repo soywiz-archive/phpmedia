@@ -3,7 +3,11 @@
 #include "zend_exceptions.h"
 #include "SAPI.h"
 #include "ext/standard/info.h"
-#include <windows.h>
+#ifdef WIN32
+	#include <windows.h>
+	#include <shlobj.h>
+	#include <winreg.h>
+#endif
 #include <SDL.h>
 #include <SDL_syswm.h>
 #include <SDL_image.h>
