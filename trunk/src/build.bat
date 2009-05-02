@@ -4,7 +4,7 @@ IF EXIST src (
 )
 SET php_path=..\..\..\..\php-5.3.0RC1
 SET sources=php_media.c
-SET library=..\php_media.dll
+SET library=..\bin\php_media.dll
 SET MYLIBS=kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib Advapi32.lib
 SET MYLIBS=%MYLIBS% SDL.lib opengl32.lib SDL_image.lib SDL_mixer.lib SDL_ttf.lib
 del ..\php_media.dll 2> NUL
