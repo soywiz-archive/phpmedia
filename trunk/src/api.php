@@ -370,4 +370,71 @@ final class Math {
 	 */
 	static public function smoothstep($min, $max, &$input) { }
 }
-?>
+
+/**
+ * Class for compiling and executing fast C code. Using libtcc.
+ *
+ * @see http://bellard.org/tcc/
+ */
+class TCC {
+	/**
+	 * Creates a new TCC state.
+	 */
+	public function __construct() { }
+
+	/**
+	 * #define $key $value.
+	 *
+	 * @param string $key   Key.
+	 * @param string $value Value.
+	 */
+	public function define($key, $value) { }
+
+	/**
+	 * Compiles C source from a string.
+	 *
+	 * @param string $string String with C source.
+	 */
+	public function sourceString($string) { }
+
+	/**
+	 * Compiles a C file.
+	 *
+	 * @param string $filename Filename to compile.
+	 */
+	public function sourceFile($filename) { }
+
+	/**
+	 * Lib to link. It must be a lib or exp file.
+	 *
+	 * @param string $filename Filename with the lib to link.
+	 */
+	public function libFile($filename) { }
+
+	/**
+	 * Adds a lib path to search for libs.
+	 *
+	 * @param string $path Path to search for libs.
+	 */
+	public function libPath($path) { }
+
+	/**
+	 * Adds an include path to search for includes.
+	 *
+	 * @param string $path Path to search for includes.
+	 */
+	public function includePath($path) { }
+
+	/**
+	 * Executes a main function.
+	 */
+	public function runMain() { }
+
+	/**
+	 * Calls a function.
+	 *
+	 * @param string $format name:params:retval.
+	 * @param array  $params Array with params to pass to the function.
+	 */
+	public function call($format, array $params) { }
+}

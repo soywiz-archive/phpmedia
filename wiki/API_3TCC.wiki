@@ -1,0 +1,15 @@
+== class TCC ==
+Class for compiling and executing fast C code. Using libtcc.
+@see http://bellard.org/tcc/
+
+<font face="Lucida Console">
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_3TCC11__construct __construct] () : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_3TCC6define define] ($key, $value) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_3TCC12sourceString sourceString] ($string) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_3TCC10sourceFile sourceFile] ($filename) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_3TCC7libFile libFile] ($filename) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_3TCC7libPath libPath] ($path) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_3TCC11includePath includePath] ($path) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_3TCC7runMain runMain] () : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method.png][API_3TCC4call call] ($format, $params) : <font color="#a88">void</font>
+</font>
