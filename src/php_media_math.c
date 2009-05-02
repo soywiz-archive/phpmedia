@@ -1,26 +1,41 @@
-// Math::clamp(&$var, $min, $max)
-PHP_METHOD_ARGS(Math, clamp) ARG_INFO(var) ARG_INFO(min) ARG_INFO(max) ZEND_END_ARG_INFO()
+// Math::clamp($min, $max, &$input)
+PHP_METHOD_ARGS(Math, clamp) ARG_INFO(min) ARG_INFO(max) ARG_INFO(input) ZEND_END_ARG_INFO()
 PHP_METHOD(Math, clamp)
 {
-	zval **var, *min, *max;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Zzz", &var, &min, &max) == FAILURE) RETURN_FALSE;
-	switch (Z_TYPE(**var)) {
+	zval **input, *min, *max;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "zzZ", &min, &max, &input) == FAILURE) RETURN_FALSE;
+	switch (Z_TYPE(**input)) {
 		case IS_DOUBLE: {
 			double min, max;
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Zdd", &var, &min, &max) == FAILURE) RETURN_FALSE;
-			if (Z_DVAL(**var) < min) Z_DVAL(**var) = min;
-			if (Z_DVAL(**var) > max) Z_DVAL(**var) = max;
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "ddZ", &min, &max, &input) == FAILURE) RETURN_FALSE;
+			if (Z_DVAL(**input) < min) Z_DVAL(**input) = min;
+			if (Z_DVAL(**input) > max) Z_DVAL(**input) = max;
 		} break;
 		case IS_LONG: {
 			int min, max;
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Zll", &var, &min, &max) == FAILURE) RETURN_FALSE;
-			if (Z_LVAL(**var) < min) Z_LVAL(**var) = min;
-			if (Z_LVAL(**var) > max) Z_LVAL(**var) = max;
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "llZ", &min, &max, &input) == FAILURE) RETURN_FALSE;
+			if (Z_LVAL(**input) < min) Z_LVAL(**input) = min;
+			if (Z_LVAL(**input) > max) Z_LVAL(**input) = max;
 		} break;
 		default: {
 			int min, max;
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Zll", &var, &min, &max) == FAILURE) RETURN_FALSE;
-			ZVAL_LONG(*var, min);
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "llZ", &min, &max, &input) == FAILURE) RETURN_FALSE;
+			ZVAL_LONG(*input, min);
 		} break;
+	}
+}
+
+// Math::smoothstep($min, $max, $input)
+PHP_METHOD_ARGS(Math, smoothstep) ARG_INFO(min) ARG_INFO(max) ARG_INFO(input) ZEND_END_ARG_INFO()
+PHP_METHOD(Math, smoothstep)
+{
+	double min = 0.0, max = 1.0, input = 0.0;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "ddd", &min, &max, &input) == FAILURE) RETURN_FALSE;
+	if (input <= min) {
+		RETURN_DOUBLE(0.0);
+	} else if (input >= max) {
+		RETURN_DOUBLE(1.0);
+	} else {
+		RETURN_DOUBLE((input - min) / (max - min));
 	}
 }
