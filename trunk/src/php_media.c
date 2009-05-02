@@ -304,7 +304,7 @@ static void register_classes(TSRMLS_D)
 	}
 }
 
-PHP_MINIT_FUNCTION(module)
+PHP_RINIT_FUNCTION(module)
 {
 	register_classes(TSRMLS_C);
 	
@@ -320,9 +320,21 @@ PHP_MINIT_FUNCTION(module)
 	return SUCCESS;
 }
 
+PHP_MINIT_FUNCTION(module)
+{
+	return SUCCESS;
+}
+
 PHP_MSHUTDOWN_FUNCTION(module)
 {
-	return 0;
+	return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(module)
+{
+	Mix_CloseAudio();
+	SDL_Quit();
+	return SUCCESS;
 }
 
 PHP_MINFO_FUNCTION(module)
@@ -346,8 +358,8 @@ zend_module_entry module_module_entry =
 	module_functions,
 	PHP_MINIT(module),
 	PHP_MSHUTDOWN(module),
-	NULL,
-	NULL,
+	PHP_RINIT(module),
+	PHP_RSHUTDOWN(module),
 	PHP_MINFO(module),
     NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
