@@ -39,3 +39,29 @@ PHP_METHOD(Math, smoothstep)
 		RETURN_DOUBLE((input - min) / (max - min));
 	}
 }
+
+// Math::sign($input)
+PHP_METHOD_ARGS(Math, sign) ARG_INFO(min) ARG_INFO(max) ARG_INFO(input) ZEND_END_ARG_INFO()
+PHP_METHOD(Math, sign)
+{
+	double value = 0.0;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "d", &value) == FAILURE) RETURN_FALSE;
+	if (value < 0.0) {
+		RETURN_LONG(-1);
+	} else if (value > 0.0) {
+		RETURN_LONG(+1);
+	} else {
+		RETURN_LONG(0);
+	}
+}
+
+// Math::swap(&$a, &$b)
+PHP_METHOD_ARGS(Math, swap) ARG_INFO(a) ARG_INFO(b) ZEND_END_ARG_INFO()
+PHP_METHOD(Math, swap)
+{
+	zval **a, **b, temp;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "ZZ", &a, &b) == FAILURE) RETURN_FALSE;
+	temp = **a;
+	**a = **b;
+	**b = temp;
+}

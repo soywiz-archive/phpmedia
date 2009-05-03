@@ -113,8 +113,16 @@ PM_METHODS(Music)
 
 PM_METHODS(Math)
 {
-	PHP_ME_AI(Math, clamp, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Math, clamp     , ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
 	PHP_ME_AI(Math, smoothstep, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Math, sign      , ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_AI(Math, swap      , ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
+	PHP_ME_END
+};
+
+PM_METHODS(Draw)
+{
+	PHP_ME_AI(Draw, line   , ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_FINAL)
 	PHP_ME_END
 };
 
@@ -291,6 +299,11 @@ static void register_classes(TSRMLS_D)
 	
 	{ // External
 		PM_CLASS_INIT(External);
+		PM_CLASS_REGISTER();
+	}
+
+	{ // Draw
+		PM_CLASS_INIT(Draw);
 		PM_CLASS_REGISTER();
 	}
 

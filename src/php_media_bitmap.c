@@ -416,3 +416,27 @@ PHP_METHOD(Bitmap, blit)
 	
 	RETURN_TRUE;
 }
+
+PHP_METHOD_ARGS(Draw, line) ARG_INFO(bitmap) ARG_INFO(x1) ARG_INFO(y1) ARG_INFO(x2) ARG_INFO(y2) ARG_INFO(border) ARG_INFO(color) ZEND_END_ARG_INFO()
+PHP_METHOD(Draw, line)
+{
+	zval *object_bitmap = NULL;
+	zval *color_array = NULL;
+	BitmapStruct *dest = NULL;
+	double colorv[4] = {1, 1, 1, 1};
+	double x1 = 0, y1 = 0, x2 = 0, y2 = 0, border = 1;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Odddd|da", &object_bitmap, ClassEntry_Bitmap, &x1, &y1, &x2, &y2, &border, &color_array) == FAILURE) RETURN_FALSE;
+	dest = (BitmapStruct *)zend_object_store_get_object(object_bitmap, TSRMLS_C);
+	BitmapPrepareDraw(dest);
+
+	extract_color(color_array, colorv);
+	
+	glLoadIdentity();
+	glColor4dv(colorv);
+	glLineWidth((GLfloat)border);
+	glDisable(GL_TEXTURE_2D);
+	glBegin(GL_LINES);
+		glVertex2d(x1, y1);
+		glVertex2d(x2, y2);
+	glEnd();
+}
