@@ -372,26 +372,18 @@ PHP_METHOD(Font, blit)
 	char *str = NULL; int str_len = 0;
 	int ptr_pos = 0; int ptr_inc = 0;
 	double x = 0.0, y = 0.0;
-	double color[4] = {1, 1, 1, 1};
+	double colorv[4] = {1, 1, 1, 1};
 	FontGlyphCache *g;
 	Uint16 ch = 0;
 	int line = 0;
 	THIS_FONT;
 	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "Os|dda", &object_bitmap, ClassEntry_Bitmap, &str, &str_len, &x, &y, &color_array) == FAILURE) RETURN_FALSE;
 	
-	if (color_array) {
-		int n = 0;
-		HashTable *ht = Z_ARRVAL_P(color_array);
-	
-		for (n = 0; n < 4; n++) {
-			zval **v = NULL;
-			if (0 == zend_hash_index_find(ht, n, (void **)&v)) { convert_to_double(*v); color[n] = Z_DVAL_PP(v); }
-		}
-	}
+	extract_color(color_array, colorv);
 
 	glPushAttrib(GL_CURRENT_BIT);
 	{
-		glColor4dv(color);
+		glColor4dv(colorv);
 
 		glLoadIdentity();
 		glTranslated(x, y, 0.0);

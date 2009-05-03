@@ -370,6 +370,39 @@ final class Math {
 	 * @param mixed &$input Variable to check and update.
 	 */
 	static public function smoothstep($min, $max, &$input) { }
+
+	/**
+	 * Returns -1 if $v < 0. Returns +1 if $v > 0. Returns 0 if $v == 0.
+	 *
+	 * @param mixed $v Value.
+	 */
+	static public function sign($v) { }
+
+	/**
+	 * Swaps the contents of the variables.
+	 *
+	 * @param mixed &$a Variable1.
+	 * @param mixed &$b Variable2.
+	 */
+	static public function swap(&$a, &$b) { }
+}
+
+/**
+ * Class for drawing.
+ */
+final class Draw {
+	/**
+	 * Draws a line in the specified bitmap.
+	 *
+	 * @param Bitmap $bitmap Bitmap to draw.
+	 * @param float  $x1 x1.
+	 * @param float  $y1 y1.
+	 * @param float  $x2 x2.
+	 * @param float  $y2 y2.
+	 * @param float  $border Border width of the line.
+	 * @param array  $color_array Color.
+	 */
+	static public function line($bitmap, $x1, $y1, $x2, $y2, $border = 1, $color_array = array(1, 1, 1, 1)) { }
 }
 
 /**

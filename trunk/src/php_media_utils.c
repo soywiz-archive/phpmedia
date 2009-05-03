@@ -3,6 +3,19 @@ void clamp(int *v, int min, int max) {
 	if (*v > max) *v = max;
 }
 
+void extract_color(zval *color_array, double colorv[4]) {
+	int n;
+	for (n = 0; n < 4; n++) colorv[n] = 1;
+	if (color_array) {
+		HashTable *ht = Z_ARRVAL_P(color_array);
+	
+		for (n = 0; n < 4; n++) {
+			zval **v = NULL;
+			if (0 == zend_hash_index_find(ht, n, (void **)&v)) { convert_to_double(*v); colorv[n] = Z_DVAL_PP(v); }
+		}
+	}
+}
+
 unsigned short utf8_decode(unsigned char *ptr, int *len) {
 	if (ptr[0] < 128) {
 		if (len != NULL) *len = 1;

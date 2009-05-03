@@ -4,4 +4,6 @@ Class for extra math operations.
 <font face="Lucida Console">
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Math5clamp clamp] ($min, $max, &$input) : <font color="#a88">void</font>
   * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Math10smoothstep smoothstep] ($min, $max, &$input) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Math4sign sign] ($v) : <font color="#a88">void</font>
+  * [http://phpmedia.googlecode.com/svn/www/icons/method_static.png][API_4Math4swap swap] (&$a, &$b) : <font color="#a88">void</font>
 </font>
