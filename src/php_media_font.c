@@ -318,12 +318,13 @@ FontGlyphCache *glyph_get(FontStruct *font, Uint16 ch) {
 		glEnable(GL_CLAMP_TO_EDGE);
 		glEnable(GL_TEXTURE_2D);
 	}
-	SDL_FreeSurface(surfaceogl);
 
-	w = g->surface->w;
-	h = g->surface->h;
+	w = surfaceogl->w;
+	h = surfaceogl->h;
 	x = 0;
 	y = 0;
+
+	SDL_FreeSurface(surfaceogl);
 
 	glNewList(g->list, GL_COMPILE);
 	{

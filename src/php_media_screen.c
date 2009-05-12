@@ -51,8 +51,6 @@ PHP_METHOD(Screen, init)
 
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	SDL_GL_SwapBuffers();
-
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_TEXTURE_2D);
 
@@ -76,6 +74,8 @@ PHP_METHOD(Screen, init)
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	SDL_GL_SwapBuffers();
 
 	if (screen) {
 		ObjectInit(ClassEntry_Bitmap, return_value, TSRMLS_C);

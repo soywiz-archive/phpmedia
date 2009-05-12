@@ -387,7 +387,13 @@ PHP_METHOD(Bitmap, blit)
 		glActiveTexture(GL_TEXTURE0 + n);
 		glMatrixMode(GL_TEXTURE);
 		glLoadIdentity();
-		glScaled(1.0 / (double)shader_bitmaps[n]->surface->w, 1.0 / (double)shader_bitmaps[n]->surface->h, 1.0);
+		{
+			float tex_w, tex_h;
+			
+			glGetTexLevelParameterfv(GL_TEXTURE_2D, 0,  GL_TEXTURE_WIDTH, &tex_w);
+			glGetTexLevelParameterfv(GL_TEXTURE_2D, 0,  GL_TEXTURE_HEIGHT, &tex_h);
+			glScaled(1.0 / (double)tex_w, 1.0 / (double)tex_h, 1.0);
+		}
 	}
 	
 	glActiveTexture(GL_TEXTURE0);

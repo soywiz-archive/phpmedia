@@ -49,8 +49,10 @@ static zval *ObjectInit(zend_class_entry *pce, zval *object, TSRMLS_D)
 	return object;
 }
 
-int __texPow2 = 0;
-int __texRectangle = 0;
+int __texPow2 = 1;
+int __texRectangle = 1;
+//int __texPow2 = 0;
+//int __texRectangle = 0;
 
 int extframebuffer = 0;
 GLuint fbo = -1;
@@ -313,5 +315,10 @@ void BitmapPrepare(BitmapStruct *bitmap) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glEnable(GL_CLAMP_TO_EDGE);
 	
+	bitmap->real_w = bitmap->surface->w;
+	bitmap->real_h = bitmap->surface->h;
+	
+	//SDL_FreeSurface(bitmap->surface);
+	//bitmap->surface = surfaceogl;
 	SDL_FreeSurface(surfaceogl);
 }
