@@ -32,7 +32,7 @@ CLASS_EXTRA_STRUCT(TCC);
 #include "php_media_audio.c"
 #include "php_media_font.c"
 #include "php_media_math.c"
-#include "php_media_tcc.c"
+//#include "php_media_tcc.c"
 
 PM_METHODS(Font)
 {
@@ -145,7 +145,7 @@ PM_METHODS(External)
 	PHP_ME_END
 };
 
-PM_METHODS(TCC)
+/*PM_METHODS(TCC)
 {
 	PHP_ME_AI(TCC, __construct , ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME_AI(TCC, define      , ZEND_ACC_PUBLIC)
@@ -157,7 +157,7 @@ PM_METHODS(TCC)
 	PHP_ME_AI(TCC, runMain     , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(TCC, call        , ZEND_ACC_PUBLIC)
 	PHP_ME_END
-};
+};*/
 
 const zend_function_entry module_functions[] =
 {
@@ -307,14 +307,14 @@ static void register_classes(TSRMLS_D)
 		PM_CLASS_REGISTER();
 	}
 
-	{ // TCC
+	/*{ // TCC
 		PM_CLASS_INIT(TCC);
 		PM_CLASS_ADD(create_object, TCC__ObjectNew)
 		PM_CLASS_REGISTER();
 		ClassEntry_TCC = CurrentClassEntry;
 		PM_HANDLERS_INIT(Handlers_TCC);
 		PM_HANDLERS_ADD(clone_obj, TCC__ObjectClone);
-	}
+	}*/
 }
 
 PHP_RINIT_FUNCTION(module)
@@ -359,6 +359,11 @@ PHP_MINFO_FUNCTION(module)
 		const SDL_version *v = SDL_Linked_Version();
 		sprintf(temp, "%d.%d.%d", v->major, v->minor, v->patch);
 		php_info_print_table_row(2, "SDL", temp);
+	}
+	{
+		const SDL_version *v = Mix_Linked_Version();
+		sprintf(temp, "%d.%d.%d", v->major, v->minor, v->patch);
+		php_info_print_table_row(2, "SDL_mixer", temp);
 	}
 	php_info_print_table_end();
 }

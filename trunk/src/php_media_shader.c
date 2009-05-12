@@ -268,7 +268,7 @@ PHP_METHOD(Shader, __get)
 		glGetProgramiv(shader->program, GL_ACTIVE_UNIFORMS, &count);
 		for (n = 0; n < count; n++) {
 			glGetActiveUniform(shader->program, n, sizeof(temp), &temp_len, &uni_len, &uni_type, temp);
-			add_assoc_long(array, temp, 0);
+			add_assoc_long(array, temp, n);
 		}
 
 		RETURN_ZVAL(array, 0, 1);

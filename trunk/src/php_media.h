@@ -34,6 +34,7 @@ typedef struct _BitmapStruct {
 	int cx, cy;
 	int x, y, w, h;
 	int smooth;
+	int real_w, real_h;
 } BitmapStruct;
 
 typedef struct {
