@@ -32,7 +32,7 @@ CLASS_EXTRA_STRUCT(TCC);
 #include "php_media_audio.c"
 #include "php_media_font.c"
 #include "php_media_math.c"
-//#include "php_media_tcc.c"
+#include "php_media_tcc.c"
 
 PM_METHODS(Font)
 {
