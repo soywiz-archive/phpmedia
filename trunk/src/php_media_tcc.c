@@ -33,13 +33,15 @@ int tcc_initialized = 0;
 
 #define TCC_LOAD_FUNC(name) { LOAD_FUNC(name); if (name == NULL) { tcc_initialized = 0; fprintf(stderr, "Can't load TCC::%s\n", #name); } }
 
+#define TCC_DYNAMIC "libtcc.dll"
+
 int tcc_init(TSRMLS_D) {
 	if (!tcc_initialized) {
 		HMODULE lib;
 
 		tcc_initialized = 1;
 
-		lib = LoadLibrary("libtcc.dll");
+		lib = LoadLibrary(TCC_DYNAMIC);
 		TCC_LOAD_FUNC(tcc_new);
 		TCC_LOAD_FUNC(tcc_delete);
 		//TCC_LOAD_FUNC(tcc_enable_debug);
@@ -83,7 +85,7 @@ PHP_METHOD(TCC, __construct)
 {
 	THIS_TCC;
 	if (!tcc_init(TSRMLS_C)) {
-		THROWF("Can't load tcc.dll");
+		THROWF("Can't load " TCC_DYNAMIC);
 		return;
 	}
 	tcc->state = tcc_new();
@@ -137,7 +139,13 @@ PHP_METHOD(TCC, sourceString)
 	THIS_TCC;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &source, &source_len) == FAILURE) RETURN_FALSE;
 
-	RETURN_LONG(tcc_compile_string(tcc->state, source));
+	if (tcc_compile_string(tcc->state, source) == 0) {
+		RETURN_TRUE;
+	} else {
+		THROWF("Can't compile string");
+	}
+	
+	//RETURN_LONG(tcc_compile_string(tcc->state, source));
 }
 
 PHP_METHOD_ARGS(TCC, define) ZEND_END_ARG_INFO()
@@ -248,42 +256,46 @@ PHP_METHOD(TCC, call)
 		char *call = call_start;
 		int n;
 
-		#define PUSH(v) \
-			*call++ = 0x68; \
-			*(unsigned int *)call = (unsigned int)(void *)(v); \
-			call += 4;
+		if (call_start != NULL) {
+			#define PUSH(v) \
+				*call++ = 0x68; \
+				*(unsigned int *)call = (unsigned int)(void *)(v); \
+				call += 4;
 
-		#define CALL(v) { \
-			*call++ = 0xB8; \
-			*(unsigned int *)call = (unsigned int)(void *)(v); \
-			call += 4; \
-			*call++ = 0xFF; \
-			*call++ = 0xD0; \
+			#define CALL(v) { \
+				*call++ = 0xB8; \
+				*(unsigned int *)call = (unsigned int)(void *)(v); \
+				call += 4; \
+				*call++ = 0xFF; \
+				*call++ = 0xD0; \
+			}
+
+			#define RET() *call++ = 0xC3;
+			#define NOP() *call++ = 0x90;
+			#define ADD_ESP(v) \
+				*call++ = 0x83; \
+				*call++ = 0xC4; \
+				*call++ = (v);
+
+			for (n = int_params_count - 1; n >= 0; n--) {
+				PUSH(int_params[n]);
+			}
+			CALL(addr);
+			// Calling "C"
+			if (1) {
+				ADD_ESP(int_params_count * 4);
+			}
+			RET();
+
+			_asm {
+				call call_start;
+				mov retval, eax;
+			}
+
+			free(call_start);
+		} else {
+			THROWF("Error allocating memory");
 		}
-
-		#define RET() *call++ = 0xC3;
-		#define NOP() *call++ = 0x90;
-		#define ADD_ESP(v) \
-			*call++ = 0x83; \
-			*call++ = 0xC4; \
-			*call++ = (v);
-
-		for (n = int_params_count - 1; n >= 0; n--) {
-			PUSH(int_params[n]);
-		}
-		CALL(addr);
-		// Calling "C"
-		if (1) {
-			ADD_ESP(int_params_count * 4);
-		}
-		RET();
-
-		_asm {
-			call call_start;
-			mov retval, eax;
-		}
-
-		free(call_start);
 	}
 
 	switch (retype) {
