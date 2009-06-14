@@ -145,7 +145,7 @@ PM_METHODS(External)
 	PHP_ME_END
 };
 
-/*PM_METHODS(TCC)
+PM_METHODS(TCC)
 {
 	PHP_ME_AI(TCC, __construct , ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME_AI(TCC, define      , ZEND_ACC_PUBLIC)
@@ -157,7 +157,7 @@ PM_METHODS(External)
 	PHP_ME_AI(TCC, runMain     , ZEND_ACC_PUBLIC)
 	PHP_ME_AI(TCC, call        , ZEND_ACC_PUBLIC)
 	PHP_ME_END
-};*/
+};
 
 const zend_function_entry module_functions[] =
 {
@@ -307,14 +307,14 @@ static void register_classes(TSRMLS_D)
 		PM_CLASS_REGISTER();
 	}
 
-	/*{ // TCC
+	{ // TCC
 		PM_CLASS_INIT(TCC);
 		PM_CLASS_ADD(create_object, TCC__ObjectNew)
 		PM_CLASS_REGISTER();
 		ClassEntry_TCC = CurrentClassEntry;
 		PM_HANDLERS_INIT(Handlers_TCC);
 		PM_HANDLERS_ADD(clone_obj, TCC__ObjectClone);
-	}*/
+	}
 }
 
 PHP_RINIT_FUNCTION(module)
