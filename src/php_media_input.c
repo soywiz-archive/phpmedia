@@ -28,6 +28,7 @@ PHP_METHOD(Keyboard, down)
 PHP_METHOD_ARGS(Mouse, show) ZEND_END_ARG_INFO()
 PHP_METHOD(Mouse, show)
 {
+	sdl_load(TSRMLS_C);
 	SDL_ShowCursor(SDL_ENABLE);
 }
 
@@ -35,6 +36,7 @@ PHP_METHOD(Mouse, show)
 PHP_METHOD_ARGS(Mouse, hide) ZEND_END_ARG_INFO()
 PHP_METHOD(Mouse, hide)
 {
+	sdl_load(TSRMLS_C);
 	SDL_ShowCursor(SDL_DISABLE);
 }
 
@@ -44,6 +46,7 @@ PHP_METHOD_ARGS(Mouse, position) ARG_INFO(x) ARG_INFO(y) ZEND_END_ARG_INFO()
 PHP_METHOD(Mouse, position)
 {
 	int x, y;
+	sdl_load(TSRMLS_C);
 	if (ZEND_NUM_ARGS() == 0) {
 		SDL_GetMouseState(&x, &y);
 		array_init(return_value);

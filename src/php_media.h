@@ -64,6 +64,8 @@ typedef struct {
 	FontGlyphCache glyphs[GLYPH_MAX_CACHE];
 } FontStruct;
 
+void sdl_load(TSRMLS_D);
+
 #define PHP_METHODS_NAME(CLASS) CLASS##_Methods
 #define PHP_METHOD_NAME_ARGINFO(CLASS, METHOD) arginfo_##CLASS##METHOD
 

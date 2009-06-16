@@ -33,6 +33,8 @@ PHP_METHOD(Bitmap, __construct)
 	int w, h;
 	THIS_BITMAP;
 
+	sdl_load(TSRMLS_C);
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "ll", &w, &h) == FAILURE) RETURN_FALSE;
 
 	bitmap->surface = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);
@@ -165,6 +167,8 @@ int Bitmap_fromRW(zval **return_value, SDL_RWops *rw, TSRMLS_D)
 {
 	SDL_Surface *surface;
 	BitmapStruct *bitmap;
+
+	sdl_load(TSRMLS_C);
 
 	if ((surface = IMG_Load_RW(rw, 1)) == NULL) return 0;
 	
