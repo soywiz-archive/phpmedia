@@ -317,8 +317,9 @@ static void register_classes(TSRMLS_D)
 	}
 }
 
-PHP_RINIT_FUNCTION(module)
-{
+int sdl_loaded = 0;
+void sdl_load(TSRMLS_D) {
+	if (sdl_loaded) return;
 	register_classes(TSRMLS_C);
 	
 	if (SDL_Init(0) != 0) THROWF("Can't initialize SDL");
@@ -326,7 +327,13 @@ PHP_RINIT_FUNCTION(module)
 	//SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 	SDL_EnableKeyRepeat(120, 50);
 	SDL_EnableUNICODE(1);
+	sdl_loaded = 1;
+}
 
+PHP_RINIT_FUNCTION(module)
+{
+	register_classes(TSRMLS_C);
+	
 	memset(keys_pressed, 0, sizeof(keys_pressed));
 	memset(keys_status, 0, sizeof(keys_status));
 	

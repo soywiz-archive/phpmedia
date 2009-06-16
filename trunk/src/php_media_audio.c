@@ -18,6 +18,8 @@ int Sound_fromRW(zval **return_value, SDL_RWops *rw, TSRMLS_D)
 	Mix_Chunk *chunk;
 	SoundStruct *sound;
 
+	sdl_load(TSRMLS_C);
+
 	if ((chunk = Mix_LoadWAV_RW(rw, 1)) == NULL) return 0;
 		
 	//ObjectInit(ClassEntry_Sound, *return_value, TSRMLS_C);
@@ -35,6 +37,8 @@ PHP_METHOD(Sound, fromFile)
 {
 	char *name = NULL;
 	int name_len = 0;
+	
+	sdl_load(TSRMLS_C);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &name, &name_len) == FAILURE) RETURN_FALSE;
 
@@ -47,6 +51,8 @@ PHP_METHOD(Sound, fromString)
 {
 	char *data = NULL;
 	int data_len = 0;
+	
+	sdl_load(TSRMLS_C);
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s", &data, &data_len) == FAILURE) RETURN_FALSE;
 
@@ -71,6 +77,9 @@ PHP_METHOD(Audio, init)
 {
 	int frequency = 22050;
 	//int frequency = 44100;
+	
+	sdl_load(TSRMLS_C);
+	
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "|l", &frequency) == FAILURE) RETURN_FALSE;
 	SDL_InitSubSystem(SDL_INIT_AUDIO);
 	if (Mix_OpenAudio(frequency, MIX_DEFAULT_FORMAT, 2, 1024) != 0) {
@@ -84,6 +93,9 @@ PHP_METHOD(Music, play)
 {
 	char *str = NULL; int str_len = 0;
 	int loops; double fadeIn = 0, position = 0;
+	
+	sdl_load(TSRMLS_C);
+	
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s|ldd", &str, &str_len, &loops, &fadeIn, &position) == FAILURE) RETURN_FALSE;
 	if (music != NULL) {
 		Mix_HaltMusic();
@@ -99,6 +111,9 @@ PHP_METHOD_ARGS(Music, stop) ARG_INFO(fadeOut) ZEND_END_ARG_INFO()
 PHP_METHOD(Music, stop)
 {
 	double fadeOut = 0;
+	
+	sdl_load(TSRMLS_C);
+	
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "|d", &fadeOut) == FAILURE) RETURN_FALSE;
 	Mix_FadeOutMusic((int)(fadeOut) * 1000);
 }
@@ -108,6 +123,7 @@ PHP_METHOD_ARGS(Music, playing) ZEND_END_ARG_INFO()
 PHP_METHOD(Music, playing)
 {
 	double fadeOut = 0;
+	sdl_load(TSRMLS_C);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "|d", &fadeOut) == FAILURE) RETURN_FALSE;
 	Mix_FadeOutMusic((int)fadeOut);
 }

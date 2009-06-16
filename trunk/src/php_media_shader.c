@@ -180,6 +180,8 @@ PHP_METHOD(Shader, __construct)
 	int r;
 	THIS_SHADER;
 
+	sdl_load(TSRMLS_C);
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s|s", &str_shader_fragment, &str_shader_fragment_len, &str_shader_vertex, &str_shader_vertex_len) == FAILURE) RETURN_FALSE;
 
 	shader->program = glCreateProgram();

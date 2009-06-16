@@ -44,6 +44,9 @@ PHP_METHOD(Font, fromFile)
 	char *name = NULL; int name_len = 0; int size = 16, index = 0;
 	SDL_RWops *rw = NULL;
 	FontStruct *object = NULL;
+	
+	sdl_load(TSRMLS_C);
+
 	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s|ll", &name, &name_len, &size, &index) == FAILURE) RETURN_FALSE;
 
 	ObjectInit(EG(called_scope), return_value, TSRMLS_C); // Late Static Binding
@@ -94,6 +97,9 @@ PHP_METHOD(Font, fromName)
 	char *name = NULL; int name_len = 0; int size = 16, index = 0;
 	SDL_RWops *rw = NULL;
 	FontStruct *object = NULL;
+	
+	sdl_load(TSRMLS_C);
+
 	FontCheckInit(); if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "s|ll", &name, &name_len, &size, &index) == FAILURE) RETURN_FALSE;
 
 	ObjectInit(EG(called_scope), return_value, TSRMLS_C); // Late Static Binding
@@ -134,6 +140,7 @@ PHP_METHOD(Font, fromName)
 PHP_METHOD_ARGS(Font, fromString) ARG_INFO(data) ARG_INFO(size) ARG_INFO(index) ZEND_END_ARG_INFO()
 PHP_METHOD(Font, fromString)
 {
+	sdl_load(TSRMLS_C);
 }
 
 // Font::width($str)

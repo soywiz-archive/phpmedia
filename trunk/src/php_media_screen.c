@@ -10,6 +10,7 @@ PHP_METHOD_ARGS(Screen, init) ARG_INFO(w) ARG_INFO(h) ARG_INFO(fullscreen) ZEND_
 PHP_METHOD(Screen, init)
 {
 	int w, h, fullscreen = 0, flags = 0;
+	sdl_load(TSRMLS_C);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "ll|l", &w, &h, &fullscreen) == FAILURE) RETURN_FALSE;
 
 	flags |= SDL_OPENGL;
@@ -102,6 +103,8 @@ PHP_METHOD(Screen, frame)
 	int k, v;
 	static unsigned int ticks = 0;
 
+	sdl_load(TSRMLS_C);
+
 	memset(keys_pressed, 0, sizeof(keys_pressed));
 	memset(mouse_pressed, 0, sizeof(mouse_pressed));
 
@@ -148,6 +151,9 @@ PHP_METHOD_ARGS(Screen, title) ARG_INFO(title) ZEND_END_ARG_INFO()
 PHP_METHOD(Screen, title)
 {
 	char *str = NULL; int str_len = 0;
+	
+	sdl_load(TSRMLS_C);
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), TSRMLS_C, "|s", &str, &str_len) == FAILURE) RETURN_FALSE;
 
 	if (str != NULL) {
