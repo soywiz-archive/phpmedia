@@ -1,0 +1,5 @@
+## class SoundEffect ##
+SoundEffect class
+
+<font face='Lucida Console'>
+</font>

@@ -1,0 +1,30 @@
+phpMedia
+
+```
+<?php
+    $screen = Screen::init(640, 480);
+?>
+```
+
+```
+<?php
+    $screen = Screen::init(640, 480);
+
+    while (true) {
+        Screen::frame();
+    }
+?>
+```
+
+```
+<?php
+    $screen = Screen::init(640, 480);
+
+    $bmp = Bitmap::fromFile('sample.png');
+
+    while (true) {
+        $bmp->blit($screen);
+        Screen::frame();
+    }
+?>
+```
